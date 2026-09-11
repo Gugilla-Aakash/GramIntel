@@ -1,0 +1,46 @@
+{
+  "name": "gramintel",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "demo": "bash scripts/demo.sh",
+    "demo:prod": "npm run build && (cd .. && python3 -c \"from backend.app.db import create_db_and_tables; create_db_and_tables()\" && python3 -c \"from backend.app.seed import seed; seed()\") && (uvicorn backend.app.main:app --host 0.0.0.0 --port 8000 & sleep 2 && next start -p 3000)"
+  },
+  "dependencies": {
+    "@base-ui/react": "^1.7.0",
+    "@fontsource-variable/fraunces": "^5.2.5",
+    "@fontsource-variable/instrument-sans": "^5.2.5",
+    "@react-three/fiber": "^8.17.10",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "framer-motion": "^11.18.2",
+    "gsap": "^3.15.0",
+    "lenis": "^1.3.4",
+    "lucide-react": "^1.34.0",
+    "maplibre-gl": "^5.6.0",
+    "next": "^14.2.28",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-markdown": "^10.1.0",
+    "remark-gfm": "^4.0.1",
+    "shadcn": "^4.19.0",
+    "tailwind-merge": "^3.6.0",
+    "three": "^0.172.0",
+    "tw-animate-css": "^1.4.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.3",
+    "@types/node": "26.3.0",
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
+    "@types/three": "^0.172.0",
+    "autoprefixer": "^10.5.4",
+    "postcss": "^8.5.26",
+    "tailwindcss": "^4.3.3",
+    "typescript": "~5.7.2"
+  }
+}
