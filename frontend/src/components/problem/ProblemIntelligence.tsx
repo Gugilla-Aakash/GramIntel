@@ -102,11 +102,11 @@ export function ProblemIntelligence() {
   const ghostsOp = useTransform(p, [0.05, 0.22], [1, 0]);
 
   const GHOSTS = [
-    { t: "Kirana store?", x: 120, y: 150 },
-    { t: "Dairy?", x: 400, y: 130 },
-    { t: "Tailoring?", x: 470, y: 420 },
-    { t: "Agri-trader?", x: 110, y: 460 },
-    { t: "Mobile repair?", x: 300, y: 80 },
+    { t: uiText(lang, "GHOST_KIRANA"), x: 120, y: 150 },
+    { t: uiText(lang, "GHOST_DAIRY"), x: 400, y: 130 },
+    { t: uiText(lang, "GHOST_TAILORING"), x: 470, y: 420 },
+    { t: uiText(lang, "GHOST_AGRI_TRADER"), x: 110, y: 460 },
+    { t: uiText(lang, "GHOST_MOBILE_REPAIR"), x: 300, y: 80 },
   ];
 
   return (
@@ -180,7 +180,7 @@ export function ProblemIntelligence() {
               <svg
                 viewBox={`0 0 ${VB} ${VB}`}
                 role="img"
-                aria-label="Scattered market data organizing into clear clusters, ending in a decision signal"
+                aria-label={uiText(lang, "PROBLEM_VISUAL_ARIA")}
                 style={{ width: "100%", height: "auto", overflow: "visible" }}
               >
                 {/* frame ticks */}
@@ -244,7 +244,7 @@ export function ProblemIntelligence() {
                     <animate attributeName="opacity" values="1;.2;1" dur="1.6s" repeatCount="indefinite" />
                   </circle>
                   <text x={220} y={221} textAnchor="start" className="body-ui" fontSize={10} fill="#F3EFE2" letterSpacing="0.12em">
-                    DECISION SIGNAL FOUND
+                    {uiText(lang, "DECISION_SIGNAL_FOUND")}
                   </text>
                 </motion.g>
               </svg>
