@@ -67,7 +67,7 @@ export function AIReasoning() {
           viewport={{ once: true, amount: 0.25 }}
           transition={{ duration: 0.8 }}
         >
-          <svg viewBox="0 0 1120 500" role="img" aria-label="Inputs of location, capital and business idea flow through the GramIntel engine into market, competition, opportunity, risk and finance outputs" style={{ width: "100%", height: "auto" }}>
+          <svg viewBox="0 0 1120 500" role="img" aria-label={uiText(lang, "PIPELINE_VISUAL_ARIA")} style={{ width: "100%", height: "auto" }}>
             {/* stage labels */}
             <text x={90} y={30} className="body-ui" fontSize={10} fill="rgba(20,35,28,.45)" letterSpacing="3">
               {uiText(lang, "INPUT")}
