@@ -6,6 +6,7 @@ import CaseChat from "@/components/portal/CaseChat";
 import Sidebar from "@/components/portal/Sidebar";
 import { setUiLang, useUiLang } from "@/lib/landing-strings";
 import { categoryText, statusText, uiText } from "@/lib/ui-strings";
+import { translateNarrative, type NarrativeLanguage } from "@/lib/narrative-translator";
 
 function formatINR(n: number) {
   return `₹${Math.round(n).toLocaleString("en-IN")}`;
@@ -31,6 +32,7 @@ export default function PortalPage() {
   const [bannerType, setBannerType] = useState<"success" | "error">("error");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [emailAddress, setEmailAddress] = useState<string | null>(null);
+  const [narrativeLoading, setNarrativeLoading] = useState(false);
 
   useEffect(() => {
     const t = localStorage.getItem("gramintel_token");
@@ -134,6 +136,34 @@ export default function PortalPage() {
     else if (r.status === 401 || r.status === 403) { setBanner(uiText(lang, "SESSION_EXPIRED")); clear(); }
   };
   useEffect(() => { if (token) loadCases(); }, [token, filter]);
+
+  const narrativeLanguages = detail?.narratives?.map((n: any) => n.language).join("|") ?? "";
+  useEffect(() => {
+    const source = detail?.narratives?.find((n: any) => n.language === "en") || detail?.narratives?.[0];
+    if (!detail || !source || detail.narratives?.some((n: any) => n.language === lang)) return;
+    if (lang === "en") return;
+    let cancelled = false;
+    setNarrativeLoading(true);
+    translateNarrative(source.content, lang as NarrativeLanguage)
+      .then((translated) => {
+        if (cancelled) return;
+        setDetail((current: any) => {
+          if (!current) return current;
+          const narratives = (current.narratives || []).filter((n: any) => n.language !== lang);
+          return {
+            ...current,
+            narratives: [...narratives, {
+              language: lang,
+              model: translated._model || "puter.js",
+              content: translated,
+            }],
+          };
+        });
+      })
+      .catch(() => {})
+      .finally(() => { if (!cancelled) setNarrativeLoading(false); });
+    return () => { cancelled = true; };
+  }, [lang, detail?.case?.id, narrativeLanguages]);
 
   const openDetail = async (c: any) => {
     if (!token) return;
@@ -353,15 +383,19 @@ export default function PortalPage() {
                       )}
                     </div>
 
-                    {detail.narratives?.length > 0 && (
+                    {((detail.narratives?.find((n: any) => n.language === lang)) || narrativeLoading) && (
                       <div style={{ background: "#fff", border: "1px solid var(--line-on-light)", borderRadius: 16, padding: 16, boxShadow: "0 1px 3px rgba(7,26,20,0.05)" }}>
                         <p className="body-ui" style={{ fontSize: 10, letterSpacing: ".1em" }}>{uiText(lang, "NARRATIVES")}</p>
-                        {detail.narratives.map((n: any, i: number) => (
-                          <div key={i} style={{ marginTop: 10, background: "var(--warm)", border: "1px solid var(--line-on-light)", borderRadius: 12, padding: 12, fontSize: 11 }}>
-                            <span className="body-ui" style={{ fontSize: 10, background: "var(--forest)", color: "#fff", padding: "2px 8px", borderRadius: 999 }}>{n.language}</span> <span style={{ marginLeft: 6, fontSize: 10, color: "rgba(20,35,28,0.4)" }}>{n.model}</span>
-                            <p style={{ marginTop: 6, lineHeight: 1.5 }}>{typeof n.content === "string" ? n.content : n.content.vernacular_summary || JSON.stringify(n.content).slice(0, 300)}</p>
-                          </div>
-                        ))}
+                        {(() => {
+                          const n = detail.narratives?.find((item: any) => item.language === lang);
+                          if (!n) return <p style={{ marginTop: 10, color: "rgba(20,35,28,0.5)" }}>{uiText(lang, "LOADING")}</p>;
+                          return (
+                            <div style={{ marginTop: 10, background: "var(--warm)", border: "1px solid var(--line-on-light)", borderRadius: 12, padding: 12, fontSize: 11 }}>
+                              <span className="body-ui" style={{ fontSize: 10, background: "var(--forest)", color: "#fff", padding: "2px 8px", borderRadius: 999 }}>{n.language.toUpperCase()}</span> <span style={{ marginLeft: 6, fontSize: 10, color: "rgba(20,35,28,0.4)" }}>{n.model}</span>
+                              <p style={{ marginTop: 6, lineHeight: 1.5 }}>{typeof n.content === "string" ? n.content : n.content.vernacular_summary || JSON.stringify(n.content).slice(0, 300)}</p>
+                            </div>
+                          );
+                        })()}
                       </div>
                     )}
 
