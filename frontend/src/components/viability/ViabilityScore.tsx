@@ -103,7 +103,7 @@ export function ViabilityScore() {
 
           <div style={{ position: "relative" }}>
             <div className="eyebrow" style={{ color: "var(--muted-on-light)", marginBottom: 18 }}>
-              DAIRY VALUE-ADDITION · KOTHUR CLUSTER
+              {uiText(lang, "VIABILITY_CONTEXT")}
             </div>
             <div
               style={{
