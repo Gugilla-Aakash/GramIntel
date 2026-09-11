@@ -2,6 +2,8 @@
 
 import { motion, type MotionValue, useTransform } from "framer-motion";
 import type { ReactNode } from "react";
+import { useUiLang } from "@/lib/landing-strings";
+import { uiText } from "@/lib/ui-strings";
 
 const CX = 320;
 const CY = 320;
@@ -34,6 +36,15 @@ const NODES: NodeDef[] = [
   { label: "COMPETITORS", angle: 197, radius: 214, delay: 2.25, anchor: "middle" },
   { label: "TRANSPORT", angle: 249, radius: 162, delay: 2.45, anchor: "end" },
 ];
+
+const NODE_KEYS: Record<string, string> = {
+  MARKETS: "MARKETS",
+  CONSUMERS: "CONSUMERS",
+  DEMAND: "DEMAND",
+  SUPPLIERS: "SUPPLIERS",
+  COMPETITORS: "COMPETITORS",
+  TRANSPORT: "TRANSPORT",
+};
 
 const connPath = (angle: number, radius: number) => {
   const [x, y] = polar(angle, radius);
@@ -71,6 +82,7 @@ export function EconomyVisual({
   mx: MotionValue<number>;
   my: MotionValue<number>;
 }) {
+  const lang = useUiLang();
   const gx = useTransform(mx, (v) => v * 7);
   const gy = useTransform(my, (v) => v * 5);
   const rx = useTransform(mx, (v) => v * 14);
@@ -86,7 +98,7 @@ export function EconomyVisual({
     <svg
       viewBox="0 0 640 640"
       role="img"
-      aria-label="Animated map of a village economy: consumers, competitors, suppliers, demand, transport and markets around one location"
+      aria-label={uiText(lang, "ECONOMY_ARIA")}
       style={{ width: "100%", height: "auto", overflow: "visible" }}
     >
       <defs>
@@ -162,7 +174,7 @@ export function EconomyVisual({
           animate={{ opacity: 1 }}
           transition={{ duration: 0.8, delay: 1.75 }}
         >
-          10 KM MARKET RADIUS
+          {uiText(lang, "MARKET_RADIUS")}
         </motion.text>
 
         {/* opportunity arc — activates last */}
@@ -248,7 +260,7 @@ export function EconomyVisual({
           animate={{ opacity: 1, y: CY - 22 }}
           transition={{ duration: 0.7, delay: 0.85 }}
         >
-          YOUR VILLAGE
+          {uiText(lang, "YOUR_VILLAGE")}
         </motion.text>
       </Layer>
 
@@ -317,7 +329,7 @@ export function EconomyVisual({
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.6, delay: n.delay + 0.25 }}
               >
-                {n.label}
+                {uiText(lang, NODE_KEYS[n.label]).toUpperCase()}
               </motion.text>
             </g>
           );
@@ -354,7 +366,7 @@ export function EconomyVisual({
             fill="#F3EFE2"
             letterSpacing="1.0"
           >
-            OPPORTUNITY DETECTED
+            {uiText(lang, "OPPORTUNITY_DETECTED")}
           </text>
         </motion.g>
       </Layer>
