@@ -106,7 +106,7 @@ export function SchemeRouter() {
         </motion.div>
 
         {/* ── the tree ── */}
-        <svg viewBox="0 0 1000 460" role="img" aria-label="Decision tree routing project cost to micro finance or term loan" style={{ width: "100%", height: "auto", overflow: "visible" }}>
+        <svg viewBox="0 0 1000 460" role="img" aria-label={uiText(lang, "SCHEME_ROUTER_ARIA")} style={{ width: "100%", height: "auto", overflow: "visible" }}>
           {/* root */}
           <rect x={400} y={18} width={200} height={46} rx={23} fill="#F3EFE2" />
           <text x={500} y={46} textAnchor="middle" fontSize={11} className="body-ui" fill="#071A14" letterSpacing="2">
