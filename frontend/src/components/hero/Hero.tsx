@@ -16,6 +16,7 @@ import { VideoBackground } from "../media/VideoBackground";
 import { Icon } from "../icons";
 import { MEDIA } from "@/lib/media";
 import { tL, useUiLang } from "@/lib/landing-strings";
+import { uiText } from "@/lib/ui-strings";
 import { useLenis, scrollToId } from "../system/SmoothScroll";
 import { useIsMobile } from "../../lib/hooks";
 
@@ -286,7 +287,7 @@ export function Hero() {
             style={{ width: 1, height: 34, background: "var(--forest)", display: "block" }}
           />
           <span className="body-ui" style={{ fontSize: 10, color: "rgba(20,35,28,.6)" }}>
-            Scroll — location to decision
+            {uiText(lang, "SCROLL_LOCATION_DECISION")}
           </span>
         </motion.div>
 
@@ -307,7 +308,7 @@ export function Hero() {
         >
           17.3835° N · 78.3222° E
           <br />
-          DEMO SCENARIO · SURVEY GRID ACTIVE
+          {uiText(lang, "DEMO_SCENARIO")}
         </motion.div>
 
         {/* the veil — melts hero into the dark section that follows; now hosts the 40vh pull-quote mantra */}
@@ -353,7 +354,7 @@ export function Hero() {
                 textWrap: "balance",
               }}
             >
-              Before you borrow, understand what you&apos;re building.
+              {uiText(lang, "VEIL_QUOTE")}
             </p>
           </motion.div>
         </motion.div>
