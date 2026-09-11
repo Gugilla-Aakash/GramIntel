@@ -1,0 +1,59 @@
+[
+  {
+    "scheme_id": "MICRO_FINANCE",
+    "scheme_name": "Micro Finance Scheme",
+    "ministry": "Ministry of Social Justice and Empowerment (MoSJE)",
+    "implementing_agency": "State Channelising Agencies (SCAs) / NBCFDC / NSFDC",
+    "project_cost_cap": 140000,
+    "max_loan_cap": 125000,
+    "max_loan_percentage": 90,
+    "interest_rate_pa": 6.5,
+    "tenure_months": 36,
+    "moratorium_months": 3,
+    "target_group": "Target group beneficiaries living below double the poverty line (DPL)",
+    "description": "Financial assistance for starting self-employment ventures in tiny/micro sector, agriculture, animal husbandry, and petty retail."
+  },
+  {
+    "scheme_id": "TERM_LOAN",
+    "scheme_name": "Term Loan Scheme",
+    "ministry": "Ministry of Social Justice and Empowerment (MoSJE)",
+    "implementing_agency": "State Channelising Agencies (SCAs) / NBCFDC / NSFDC",
+    "project_cost_min": 140001,
+    "project_cost_cap": 5000000,
+    "max_loan_cap": 4500000,
+    "max_loan_percentage": 90,
+    "interest_rate_pa": 8.0,
+    "tenure_months": 84,
+    "moratorium_months": 6,
+    "target_group": "Target group entrepreneurs establishing viable income generating units",
+    "description": "Term credit for capital asset acquisition, equipment, machinery, vehicle, cold-chain, or dairy units up to ₹50 Lakh."
+  },
+  {
+    "scheme_id": "MAHILA_SAMRIDDHI",
+    "scheme_name": "Mahila Samriddhi Yojana",
+    "ministry": "Ministry of Social Justice and Empowerment (MoSJE)",
+    "implementing_agency": "NBCFDC through SCAs & Regional Rural Banks (RRBs)",
+    "project_cost_cap": 140000,
+    "max_loan_cap": 125000,
+    "max_loan_percentage": 95,
+    "interest_rate_pa": 4.0,
+    "tenure_months": 36,
+    "moratorium_months": 3,
+    "target_group": "Women beneficiaries of backward classes / scheduled castes formed into SHGs",
+    "description": "Exclusive women micro-lending scheme providing highly subsidized concessional credit at 4% p.a. for rural micro-enterprises."
+  },
+  {
+    "scheme_id": "NEW_SWARNIMA",
+    "scheme_name": "New Swarnima Scheme for Women",
+    "ministry": "Ministry of Social Justice and Empowerment (MoSJE)",
+    "implementing_agency": "NBCFDC",
+    "project_cost_cap": 200000,
+    "max_loan_cap": 200000,
+    "max_loan_percentage": 100,
+    "interest_rate_pa": 5.0,
+    "tenure_months": 60,
+    "moratorium_months": 6,
+    "target_group": "Women entrepreneurs from target groups",
+    "description": "Concessional term loan up to ₹2.00 Lakh for women without requiring any personal margin money (100% financed) at 5% p.a."
+  }
+]
