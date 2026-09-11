@@ -288,6 +288,11 @@ class GroqClient(BaseAPIClient):
     def _fallback(self, lang_code: str, village: str, scheme: str, rate: float, years: int, buffer: int, category: str) -> Dict[str, Any]:
         template = FALLBACK_TEMPLATES.get(lang_code, FALLBACK_TEMPLATES["en"])
         summary = template.format(buffer=f"{buffer:,}", scheme=scheme, rate=rate, years=years, village=village)
+        category_names = {
+            "hi": {"Dairy": "डेयरी", "Retail": "खुदरा", "Textile": "वस्त्र", "Food Processing": "खाद्य प्रसंस्करण", "Poultry": "पोल्ट्री", "Kirana": "किराना", "Services": "सेवाएँ", "Food": "खाद्य"},
+            "te": {"Dairy": "పాడి పరిశ్రమ", "Retail": "రిటైల్", "Textile": "వస్త్రాలు", "Food Processing": "ఆహార ప్రాసెసింగ్", "Poultry": "పౌల్ట్రీ", "Kirana": "కిరాణా", "Services": "సేవలు", "Food": "ఆహారం"},
+        }
+        display_category = category_names.get(lang_code, {}).get(category, category)
         swot_en = {
             "strengths": f"Good local demand for {category} near {village}; 3 supply points within 6km.",
             "weaknesses": "First-time entrepreneur; needs working capital discipline.",
@@ -296,14 +301,14 @@ class GroqClient(BaseAPIClient):
         }
         if lang_code == "hi":
             swot = {
-                "strengths": f"{village} के पास {category} की अच्छी माँग; 6 किमी में 3 आपूर्ति केंद्र।",
+                "strengths": f"{village} के पास {display_category} की अच्छी माँग; 6 किमी में 3 आपूर्ति केंद्र।",
                 "weaknesses": "पहली बार उद्यमी; कार्यशील पूँजी अनुशासन ज़रूरी।",
                 "opportunities": "मूल्य-वर्धित आला बाज़ार में अवसर; प्रीमियम मूल्य संभव।",
                 "threats": "मौसमी उतार-चढ़ाव और एकल-खरीदार निर्भरता।",
             }
         elif lang_code == "te":
             swot = {
-                "strengths": f"{village} దగ్గర {category} కు మంచి డిమాండ్; 6కిమీ లో 3 సప్లై కేంద్రాలు.",
+                "strengths": f"{village} దగ్గర {display_category}కు మంచి డిమాండ్; 6 కి.మీ.లో 3 సరఫరా కేంద్రాలు.",
                 "weaknesses": "మొదటిసారి వ్యవస్థాపకుడు; వర్కింగ్ క్యాపిటల్ క్రమశిక్షణ అవసరం.",
                 "opportunities": "విలువ-ఆధారిత నిచ్ లో అవకాశం; ప్రీమియం ధర సాధ్యం.",
                 "threats": "సీజనల్ హెచ్చుతగ్గులు మరియు ఒకే కొనుగోలుదారుపై ఆధారపడటం.",
@@ -311,11 +316,16 @@ class GroqClient(BaseAPIClient):
         else:
             swot = swot_en
 
+        pricing_notes = {
+            "en": "Suggested band ±12% around district median; align with local purchasing power.",
+            "hi": "जिले के औसत मूल्य के आसपास ±12% सीमा रखें और स्थानीय क्रय-शक्ति के अनुसार तय करें।",
+            "te": "జిల్లా మధ్యస్థ ధర చుట్టూ ±12% పరిధిని ఉంచి, స్థానిక కొనుగోలు శక్తికి అనుగుణంగా ధర నిర్ణయించండి.",
+        }
         return {
             "swot": swot,
             "opportunity_insight": summary,
             "threats_note": swot["threats"],
-            "pricing_note": "Suggested band ±12% around district median; align with local purchasing power.",
+            "pricing_note": pricing_notes.get(lang_code, pricing_notes["en"]),
             "vernacular_summary": summary,
             "_model": "template",
             "_source": "template",
