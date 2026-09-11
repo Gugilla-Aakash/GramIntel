@@ -55,7 +55,7 @@ export function DataSourceLabel({
         </span>
         <span style={{ fontSize: 11, opacity: 0.85 }}>{m.body(lang, note)}</span>
         {updated && (
-          <span style={{ fontSize: 10, opacity: 0.55 }}>· Updated: {updated}</span>
+          <span style={{ fontSize: 10, opacity: 0.55 }}>· {uiText(lang, "UPDATED")}: {updated}</span>
         )}
       </span>
     </motion.div>
