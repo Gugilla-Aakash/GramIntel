@@ -1,0 +1,288 @@
+{
+  "Dairy": {
+    "category": "Dairy",
+    "agmarknet_code": "DAIRY_MILK_BUFF_COW",
+    "primary_product": "Raw Milk & Value-Added Dairy Products",
+    "unit": "kg",
+    "wholesale_modal_price_inr": 48,
+    "retail_modal_price_inr": 60,
+    "price_range": [53, 67],
+    "value_add_margin_pct": 28.5,
+    "typical_monthly_hh_spend_inr": 1650,
+    "benchmark_source": "Agmarknet Mandi Feeds & National Dairy Development Board (NDDB)",
+    "value_added_products": [
+      { "name": "Fresh Curd (Dahi)", "price_per_kg": 76, "margin_pct": 24 },
+      { "name": "Paneer (Cottage Cheese)", "price_per_kg": 340, "margin_pct": 32 },
+      { "name": "Desi Ghee", "price_per_kg": 620, "margin_pct": 38 },
+      { "name": "Butter Milk (Chaas)", "price_per_litre": 35, "margin_pct": 45 }
+    ],
+    "niches": [
+      { "niche": "Value-added dairy (paneer/curd packaging)", "score": 82, "reason": "32–38% gross margin over raw milk; local chilling points available" },
+      { "niche": "Direct-to-consumer farm milk supply", "score": 76, "reason": "Eliminates middleman cut; ensures daily cash realization" },
+      { "niche": "Cattle feed & mineral mixture depot", "score": 68, "reason": "High repeat purchase by village dairy farmers" }
+    ],
+    "swot_strengths": [
+      "Daily cash liquidity with established cooperative collection network",
+      "Substantial value-addition margin (25–38%) in paneer and curd vs raw milk"
+    ],
+    "swot_weaknesses": [
+      "Perishable nature requires strict morning/evening cold-chain discipline",
+      "Feed and green fodder costs fluctuate during summer months"
+    ],
+    "threats": [
+      "Seasonal production dips in summer (up to 20–30% yield reduction)",
+      "Single-buyer dependency if selling exclusively to one dairy private vendor",
+      "Power outages impacting milk chilling and shelf life"
+    ]
+  },
+  "Retail": {
+    "category": "Retail",
+    "agmarknet_code": "RURAL_RETAIL_FMCG",
+    "primary_product": "Fast Moving Consumer Goods & Daily Household Needs",
+    "unit": "basket",
+    "wholesale_modal_price_inr": 38,
+    "retail_modal_price_inr": 45,
+    "price_range": [40, 50],
+    "value_add_margin_pct": 18.0,
+    "typical_monthly_hh_spend_inr": 3600,
+    "benchmark_source": "Ministry of Statistics & PI (NSSO 75th Household Consumer Expenditure)",
+    "value_added_products": [
+      { "name": "Packaged Staples & Pulses", "price_per_kg": 110, "margin_pct": 14 },
+      { "name": "FMCG Personal Care & Cleaning", "price_per_unit": 65, "margin_pct": 18 },
+      { "name": "Beverages & Packaged Snacks", "price_per_unit": 25, "margin_pct": 22 },
+      { "name": "Stationery & Recharge Services", "price_per_unit": 50, "margin_pct": 15 }
+    ],
+    "niches": [
+      { "niche": "Pre-packed monthly grocery ration bundles", "score": 79, "reason": "Predictable monthly cashflows; higher basket size" },
+      { "niche": "Village doorstep delivery for elderly & farm households", "score": 74, "reason": "Builds high customer loyalty in 5–8 km periphery" },
+      { "niche": "Clean farm-input & daily necessity combo store", "score": 66, "reason": "Captures both household and farm needs in one stop" }
+    ],
+    "swot_strengths": [
+      "Consistent recurring everyday demand across all seasons",
+      "Low barrier to entry with immediate customer familiarity"
+    ],
+    "swot_weaknesses": [
+      "Credit sales (Khata system) pressure on working capital",
+      "Competitive crowding from traditional kirana shops"
+    ],
+    "threats": [
+      "Wholesale price volatility in edible oils and pulses",
+      "Credit default risk from informal customer loans",
+      "Quick commerce and wholesale van penetration from nearby town centers"
+    ]
+  },
+  "Kirana": {
+    "category": "Kirana",
+    "agmarknet_code": "RURAL_KIRANA_PROVISIONS",
+    "primary_product": "Daily Provisions, Cereals, Spices & Edibles",
+    "unit": "basket",
+    "wholesale_modal_price_inr": 35,
+    "retail_modal_price_inr": 42,
+    "price_range": [37, 47],
+    "value_add_margin_pct": 16.5,
+    "typical_monthly_hh_spend_inr": 3800,
+    "benchmark_source": "Agmarknet Essential Commodity Monitor & NSSO CES",
+    "value_added_products": [
+      { "name": "Grains & Rice Varieties", "price_per_kg": 52, "margin_pct": 12 },
+      { "name": "Edible Oils (Sunflower/Groundnut)", "price_per_litre": 145, "margin_pct": 9 },
+      { "name": "Whole & Ground Spices", "price_per_100g": 42, "margin_pct": 24 }
+    ],
+    "niches": [
+      { "niche": "Whole spice & organic pulses blending", "score": 77, "reason": "Higher margin than commoditized packaged goods" },
+      { "niche": "Weekly haat mobile provision cart", "score": 72, "reason": "Taps peripheral hamlets on market days" },
+      { "niche": "Digital payment-enabled grocery service", "score": 67, "reason": "Attracts youth and salaried village staff" }
+    ],
+    "swot_strengths": [
+      "Inelastic food staples demand ensuring resilient baseline turnover",
+      "Direct relationship with local households"
+    ],
+    "swot_weaknesses": [
+      "Inventory obsolescence and rodent damage risk",
+      "Margin compression on branded commodity goods"
+    ],
+    "threats": [
+      "Supplier minimum order quantity constraints",
+      "Working capital lockup in slow-moving items",
+      "Seasonal harvest credit lag"
+    ]
+  },
+  "Poultry": {
+    "category": "Poultry",
+    "agmarknet_code": "POULTRY_BROILER_EGG",
+    "primary_product": "Commercial Broiler, Desi Chicken & Farm Eggs",
+    "unit": "kg",
+    "wholesale_modal_price_inr": 46,
+    "retail_modal_price_inr": 58,
+    "price_range": [51, 65],
+    "value_add_margin_pct": 34.0,
+    "typical_monthly_hh_spend_inr": 1250,
+    "benchmark_source": "National Egg Coordination Committee (NECC) & Directorate of Poultry Research (ICAR)",
+    "value_added_products": [
+      { "name": "Dressed Broiler Chicken", "price_per_kg": 195, "margin_pct": 26 },
+      { "name": "Desi (Country) Chicken Live", "price_per_kg": 320, "margin_pct": 42 },
+      { "name": "Farm Table Eggs (Tray of 30)", "price_per_tray": 185, "margin_pct": 22 },
+      { "name": "Organic Manure (Dried Poultry Litter)", "price_per_bag": 160, "margin_pct": 60 }
+    ],
+    "niches": [
+      { "niche": "Backyard country (Desi/Kadaknath) poultry", "score": 84, "reason": "Command 2.5x price over broiler; lower commercial feed cost" },
+      { "niche": "Direct dressed chicken retailing with cold storage", "score": 78, "reason": "Captures ₹40–60/kg cutting and packaging margin" },
+      { "niche": "Egg delivery to dhabas, hostels and tea stalls", "score": 71, "reason": "Guaranteed weekly bulk orders within 10 km" }
+    ],
+    "swot_strengths": [
+      "Short 38–42 day harvest cycle for broiler giving rapid capital velocity",
+      "Expanding rural protein consumption with 8–10% annual market growth"
+    ],
+    "swot_weaknesses": [
+      "High sensitivity to poultry feed (soya/maize) price spikes",
+      "Disease and mortality vulnerability requiring strict biosecurity"
+    ],
+    "threats": [
+      "Avian flu outbreak rumors collapsing local retail demand",
+      "Severe summer heat stress causing higher mortality rates",
+      "Local bird price manipulation by regional poultry integrators"
+    ]
+  },
+  "Food Processing": {
+    "category": "Food Processing",
+    "agmarknet_code": "AGRO_FOOD_PROCESSING_MSME",
+    "primary_product": "Atta Chakki, Spice Grinding, Oil Pressing & Snacks",
+    "unit": "kg",
+    "wholesale_modal_price_inr": 40,
+    "retail_modal_price_inr": 50,
+    "price_range": [44, 56],
+    "value_add_margin_pct": 32.0,
+    "typical_monthly_hh_spend_inr": 950,
+    "benchmark_source": "Ministry of Food Processing Industries (MoFPI) & Khadi and Village Industries (KVIC)",
+    "value_added_products": [
+      { "name": "Stone-ground Fresh Whole Wheat Flour", "price_per_kg": 46, "margin_pct": 28 },
+      { "name": "Ground Turmeric & Chilli Powder", "price_per_kg": 240, "margin_pct": 45 },
+      { "name": "Cold-pressed Groundnut/Mustard Oil", "price_per_litre": 220, "margin_pct": 36 },
+      { "name": "Papad, Pickles & Savory Snacks", "price_per_kg": 210, "margin_pct": 40 }
+    ],
+    "niches": [
+      { "niche": "Multi-grain healthy flour & millet milling", "score": 81, "reason": "Growing awareness of diabetic-friendly millets; 40% margin" },
+      { "niche": "Custom spice cleaning, roasting & pulverized packaging", "score": 77, "reason": "Local weddings and dhabas prefer unadulterated fresh masala" },
+      { "niche": "Small cold-press wood expeller (Kachi Ghani) oil unit", "score": 73, "reason": "Premium urban/semi-urban demand for virgin cooking oils" }
+    ],
+    "swot_strengths": [
+      "Significant value addition to local agricultural raw produce",
+      "Low competitive density in specialized hygienic processing"
+    ],
+    "swot_weaknesses": [
+      "Machinery investment and regular motor/belt maintenance needs",
+      "Packaging and FSSAI basic registration compliance requirement"
+    ],
+    "threats": [
+      "Power tariff hikes or frequent voltage fluctuations damaging electric motors",
+      "Raw material seasonality requiring buffer stock financing",
+      "Competition from large national FMCG packaged brands"
+    ]
+  },
+  "Textiles": {
+    "category": "Textiles",
+    "agmarknet_code": "TEXTILE_HANDLOOM_APPAREL",
+    "primary_product": "Handloom / Powerloom Weaving, Garments & Tailoring",
+    "unit": "piece",
+    "wholesale_modal_price_inr": 42,
+    "retail_modal_price_inr": 55,
+    "price_range": [48, 62],
+    "value_add_margin_pct": 38.0,
+    "typical_monthly_hh_spend_inr": 800,
+    "benchmark_source": "Development Commissioner (Handlooms), Ministry of Textiles",
+    "value_added_products": [
+      { "name": "Cotton Handloom Saree / Dress Material", "price_per_piece": 750, "margin_pct": 35 },
+      { "name": "Ladies Suit & Blouse Stitching", "price_per_garment": 250, "margin_pct": 75 },
+      { "name": "School Uniform & Workwear Stitching", "price_per_set": 480, "margin_pct": 40 },
+      { "name": "Home Furnishing (Curtains/Cushion covers)", "price_per_piece": 180, "margin_pct": 50 }
+    ],
+    "niches": [
+      { "niche": "Boutique tailoring with computer embroidery", "score": 83, "reason": "High wedding and festival season margins; 60–80% gross value" },
+      { "niche": "School and institutional uniform bulk manufacturing", "score": 78, "reason": "Annual bulk contracts from village private and govt schools" },
+      { "niche": "Traditional craft / saree embellishment and finishing", "score": 70, "reason": "Taps nearby urban retail fashion boutiques" }
+    ],
+    "swot_strengths": [
+      "High labor-to-capital value conversion with low raw material wastage",
+      "Strong festive and wedding seasonal demand peaks"
+    ],
+    "swot_weaknesses": [
+      "Skill-dependent quality requiring trained tailors and operators",
+      "Lumpy revenues concentrated around festival and harvest seasons"
+    ],
+    "threats": [
+      "Low-cost synthetic fast-fashion garments from powerloom hubs",
+      "Yarn price inflation compressing artisan margins",
+      "Changing consumer preference towards ready-made garments"
+    ]
+  },
+  "Services": {
+    "category": "Services",
+    "agmarknet_code": "RURAL_TECHNICAL_SERVICES",
+    "primary_product": "Technical Repair, Maintenance, Grooming & Fabrication",
+    "unit": "job",
+    "wholesale_modal_price_inr": 38,
+    "retail_modal_price_inr": 48,
+    "price_range": [42, 54],
+    "value_add_margin_pct": 52.0,
+    "typical_monthly_hh_spend_inr": 650,
+    "benchmark_source": "Ministry of Skill Development & Entrepreneurship (MSDE) & NSDC",
+    "value_added_products": [
+      { "name": "Two-Wheeler Servicing & Oil Change", "price_per_job": 350, "margin_pct": 55 },
+      { "name": "Agricultural Pump & Motor Rewinding", "price_per_job": 650, "margin_pct": 60 },
+      { "name": "Welding & Farm Implement Fabrication", "price_per_job": 480, "margin_pct": 48 },
+      { "name": "Rural Solar & Battery Maintenance", "price_per_job": 500, "margin_pct": 65 }
+    ],
+    "niches": [
+      { "niche": "Doorstep farm machinery & tractor repair", "score": 85, "reason": "Farmers lose money on downtime; willing to pay premium for rapid repair" },
+      { "niche": "Two-wheeler puncture, tubeless repair & spare parts", "score": 80, "reason": "Heavy motorcycle density on village connecting roads" },
+      { "niche": "Solar inverter and water pump technical maintenance", "score": 74, "reason": "Surge in rural solar pump adoption under PM-KUSUM" }
+    ],
+    "swot_strengths": [
+      "Negligible raw material holding cost; high service margin",
+      "Immediate on-the-spot cash collection with zero credit risk"
+    ],
+    "swot_weaknesses": [
+      "Revenue generation limited by technician working hours",
+      "Requires specialized toolkit and testing equipment"
+    ],
+    "threats": [
+      "Spare parts distributor price increases",
+      "Migration of skilled mechanics to nearby urban centers",
+      "Electric vehicle adoption requiring new electronic diagnostics"
+    ]
+  },
+  "Animal Husbandry": {
+    "category": "Animal Husbandry",
+    "agmarknet_code": "LIVESTOCK_GOAT_SHEEP",
+    "primary_product": "Stall-Fed Goat Rearing & Meat Production",
+    "unit": "kg",
+    "wholesale_modal_price_inr": 70,
+    "retail_modal_price_inr": 95,
+    "price_range": [84, 106],
+    "value_add_margin_pct": 40.0,
+    "typical_monthly_hh_spend_inr": 1100,
+    "benchmark_source": "Central Institute for Research on Goats (CIRG) & 20th Livestock Census",
+    "value_added_products": [
+      { "name": "Live Weight Male Goat (Eid/Festival)", "price_per_kg": 360, "margin_pct": 45 },
+      { "name": "Breeding Doe (Female Goat)", "price_per_head": 7500, "margin_pct": 38 },
+      { "name": "Goat Milk (Therapeutic/Medicinal)", "price_per_litre": 85, "margin_pct": 65 }
+    ],
+    "niches": [
+      { "niche": "Intensive stall-fed Sirohi/Black Bengal goat fattening", "score": 86, "reason": "Commands huge festival market premiums; low grazing land dependency" },
+      { "niche": "High-yield breeding stock supply to SHG members", "score": 79, "reason": "Strong demand backed by NRLM livelihood subsidies" },
+      { "niche": "Goat manure packing for nursery and organic farms", "score": 70, "reason": "Valuable secondary revenue stream" }
+    ],
+    "swot_strengths": [
+      "Low initial investment with prolific kidding rate (twinning common)",
+      "High disease resistance compared to commercial broiler poultry"
+    ],
+    "swot_weaknesses": [
+      "Requires shelter construction and daily green fodder cutting",
+      "Initial 6–8 month gestation before first kid sale"
+    ],
+    "threats": [
+      "PPR and enterotoxemia outbreaks if vaccination is missed",
+      "Predator risk in perimeter sheds without proper fencing",
+      "Fodder scarcity during prolonged dry spells"
+    ]
+  }
+}
