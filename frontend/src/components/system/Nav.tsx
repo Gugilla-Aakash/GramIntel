@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLenis, scrollToId } from "./SmoothScroll";
 import { MagneticButton } from "../primitives/MagneticButton";
 import { useIsMobile } from "../../lib/hooks";
-import { NAV, setUiLang, tL, useUiLang, type UiLang } from "../../lib/landing-strings";
+import { LANG_OPTIONS, NAV, setUiLang, tL, useUiLang } from "../../lib/landing-strings";
 import { uiText } from "../../lib/ui-strings";
 
 const LINKS = [
@@ -18,12 +18,6 @@ const LINKS = [
   { id: "multilingual", label: "Language" },
 ];
 
-const LANG_OPTIONS: { code: UiLang; label: string }[] = [
-  { code: "en", label: "EN" },
-  { code: "hi", label: "हि" },
-  { code: "te", label: "తె" },
-];
-
 export function Nav() {
   const lenis = useLenis();
   const isMobile = useIsMobile();
@@ -31,12 +25,30 @@ export function Nav() {
   const [active, setActive] = useState<string | null>(null);
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [languageOpen, setLanguageOpen] = useState(false);
+  const languageRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  useEffect(() => {
+    if (!languageOpen) return;
+    const closeOnOutside = (event: PointerEvent) => {
+      if (!languageRef.current?.contains(event.target as Node)) setLanguageOpen(false);
+    };
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setLanguageOpen(false);
+    };
+    document.addEventListener("pointerdown", closeOnOutside);
+    document.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.removeEventListener("pointerdown", closeOnOutside);
+      document.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [languageOpen]);
 
   useEffect(() => {
     const ids = LINKS.map((l) => l.id);
@@ -192,30 +204,34 @@ export function Nav() {
               </a>
             </div>
 
-            <div className="nav-cta" role="group" aria-label={NAV[lang].langLabel} style={{ display: "flex", gap: 4, border: "1px solid rgba(255,255,255,.35)", borderRadius: 999, padding: 3 }}>
-              {LANG_OPTIONS.map((o) => (
-                <button
-                  key={o.code}
-                  data-cursor="button"
-                  onClick={() => setUiLang(o.code)}
-                  aria-pressed={lang === o.code}
-                  className="body-ui"
-                  style={{
-                    fontSize: 11,
-                    padding: "8px 14px",
-                    borderRadius: 999,
-                    border: "none",
-                    background: lang === o.code ? "var(--forest)" : "transparent",
-                    color: "#fff",
-                    opacity: lang === o.code ? 1 : 0.65,
-                    cursor: "pointer",
-                    minWidth: 44,
-                    minHeight: 36,
-                  }}
-                >
-                  {o.label}
-                </button>
-              ))}
+            <div ref={languageRef} className="nav-language" role="group" aria-label={NAV[lang].langLabel}>
+              <button
+                type="button"
+                data-cursor="button"
+                className="body-ui nav-language-trigger"
+                onClick={() => setLanguageOpen((open) => !open)}
+                aria-expanded={languageOpen}
+                aria-haspopup="listbox"
+              >
+                {LANG_OPTIONS.find((o) => o.code === lang)?.label ?? "EN"}
+                <span aria-hidden>{languageOpen ? "⌃" : "⌄"}</span>
+              </button>
+              {languageOpen && (
+                <div className="nav-language-menu" role="listbox" aria-label={NAV[lang].langLabel}>
+                  {LANG_OPTIONS.map((o) => (
+                    <button
+                      key={o.code}
+                      type="button"
+                      role="option"
+                      aria-selected={lang === o.code}
+                      onClick={() => { setUiLang(o.code); setLanguageOpen(false); }}
+                    >
+                      <span>{o.label}</span>
+                      <span>{o.name}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="nav-cta">
@@ -225,9 +241,11 @@ export function Nav() {
                 strength={0.25}
                 style={{
                   border: "1px solid rgba(255,255,255,.45)",
-                  borderRadius: 999,
-                  padding: "10px 20px",
+                  borderRadius: 8,
+                  padding: "9px 14px",
                   color: "#fff",
+                  whiteSpace: "nowrap",
+                  minWidth: "max-content",
                 }}
               >
                 <span className="body-ui" style={{ fontSize: 10.5 }}>
