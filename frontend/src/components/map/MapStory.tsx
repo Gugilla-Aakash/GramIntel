@@ -178,7 +178,7 @@ export function MapStory() {
               boxShadow: "0 1px 4px rgba(0,0,0,.08)",
             }}
           >
-            TELANGANA INTELLIGENCE JOURNEY · {loc.n} / 05
+            {uiText(lang, "MAP_JOURNEY")} · {loc.n} / 05
           </div>
         </div>
 
@@ -249,7 +249,7 @@ export function MapStory() {
                 {loc.n} · {loc.name.toUpperCase()}
               </span>
               <span className="body-ui" style={{ fontSize: 7, letterSpacing: ".16em", color: "#5f6368", marginLeft: "auto", background: "#f8f9fa", border: "1px solid #e8eaed", borderRadius: 999, padding: "3px 8px" }}>
-                {loc.dataStatus === "demo" ? "DEMO DATA" : loc.dataStatus === "estimate" ? "AI ESTIMATE" : "REAL MAP DATA"}
+                {loc.dataStatus === "demo" ? uiText(lang, "DEMO_DATA") : loc.dataStatus === "estimate" ? uiText(lang, "AI_ESTIMATE") : uiText(lang, "VERIFIED_DATA")}
               </span>
             </div>
 
