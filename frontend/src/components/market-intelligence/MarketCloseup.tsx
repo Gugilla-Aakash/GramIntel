@@ -124,10 +124,7 @@ export function MarketCloseup() {
           {/* ── live intelligence ledger ── */}
           <div>
             <h3 className="display-m" style={{ color: "var(--text-dark)", maxWidth: 420 }}>
-              {uiText(lang, "MARKET_QUANTIFIED")}
-              <span className="serif-i" style={{ color: "var(--forest)" }}>
-                quantified.
-              </span>
+              <span className="serif-i" style={{ color: "var(--forest)" }}>{uiText(lang, "MARKET_QUANTIFIED")}</span>
             </h3>
             <p className="body-lg" style={{ marginTop: 14, color: "var(--muted-on-light)", maxWidth: 420 }}>
               {uiText(lang, "MARKET_BODY")}
@@ -177,8 +174,8 @@ export function MarketCloseup() {
             <div style={{ marginTop: 18 }}>
               <DataSourceLabel
                 status="demo"
-                note="Simulated for prototype"
-                updated="Demo"
+                note={uiText(lang, "SIMULATED_DATA")}
+                updated={uiText(lang, "DEMO_DATA")}
                 dark={false}
               />
             </div>
