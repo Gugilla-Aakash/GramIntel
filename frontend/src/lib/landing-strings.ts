@@ -10,6 +10,12 @@ export const LANG_EVENT = "gi-lang";
 
 export type LandingSection = "HERO" | "NAV";
 
+export const LANG_OPTIONS: { code: UiLang; label: string; name: string }[] = [
+  { code: "en", label: "EN", name: "English" },
+  { code: "hi", label: "हि", name: "हिन्दी" },
+  { code: "te", label: "తె", name: "తెలుగు" },
+];
+
 export interface HeroStrings {
   eyebrow: string;
   line1: string;
