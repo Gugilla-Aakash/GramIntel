@@ -489,7 +489,7 @@ export default function ExplorerMap({
               borderRadius: 999,
             }}
           >
-            INTERACTIVE MAP OFFLINE · EXPLORER UNAVAILABLE
+            {uiText(lang, "OFFLINE_MAP")}
           </span>
           <span
             className="body-ui"
