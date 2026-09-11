@@ -19,14 +19,13 @@ import {
   fetchRealPlaces,
   fetchPlacesNear,
   getCategoryColor,
-  getCategoryLabel,
   type PlaceCategory,
   type RealPlace,
 } from "@/lib/places";
 import { MAP_STORY, cameraForProgressQuick } from "@/lib/map/map-story";
 import { useIsTouch } from "../../lib/hooks";
 import { DefaultPoster } from "../media/VideoBackground";
-import { useUiLang } from "@/lib/landing-strings";
+import { useUiLang, type UiLang } from "@/lib/landing-strings";
 import { uiText } from "@/lib/ui-strings";
 import { localizeMapStory } from "@/lib/map/map-story-strings";
 
@@ -85,6 +84,24 @@ const CANDIDATES: Array<{ label: string; style: string | any }> = [
 /* ─── Gandipet, Hyderabad, Telangana ─── */
 const CENTER: [number, number] = demoData.location.coords; // [78.3222, 17.3835]
 
+const CATEGORY_UI_KEYS: Partial<Record<PlaceCategory, string>> = {
+  all: "ALL",
+  market: "MARKET",
+  food: "FOOD",
+  landmark: "FAMOUS_PLACES",
+  retail: "RETAIL",
+  healthcare: "HEALTH",
+  education: "EDUCATION",
+  finance: "FINANCE",
+  transport: "TRANSPORT",
+  business: "BUSINESS",
+};
+
+function localizedCategoryLabel(lang: UiLang, category: string): string {
+  const key = CATEGORY_UI_KEYS[category as PlaceCategory];
+  return key ? uiText(lang, key) : category;
+}
+
 export type Chapter = 0 | 1 | 2 | 3 | 4;
 
 const CHAPTER_CAM: Record<Chapter, Omit<FlyToOptions, "essential">> = {
@@ -126,6 +143,7 @@ export default function GramIntelMap({
   onReady?: () => void;
 }) {
   const lang = useUiLang();
+  const langRef = useRef<UiLang>(lang);
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MLMap | null>(null);
   const mainPinRef = useRef<maplibregl.Marker | null>(null);
@@ -142,6 +160,16 @@ export default function GramIntelMap({
   const [realPlacesCount, setRealPlacesCount] = useState(0);
   const [mapInteractive, setMapInteractive] = useState(true);
   const placesRef = useRef<RealPlace[]>([]);
+
+  useEffect(() => {
+    langRef.current = lang;
+    const markerEl = document.querySelector(".gi-pin-label") as HTMLElement | null;
+    if (markerEl) {
+      const stage = progress === undefined ? 0 : Math.min(MAP_STORY.length - 1, Math.max(0, Math.floor(progress * MAP_STORY.length)));
+      const loc = MAP_STORY[stage];
+      markerEl.textContent = `${loc.name.toUpperCase()} · ${stage === 0 ? uiText(lang, "DEMO_PIN") : `${uiText(lang, "STAGE_LOCATION")} ${stage + 1}`}`;
+    }
+  }, [lang, progress]);
 
   const note = (s: string) => {
     console.warn(`[GramIntel] ${s}`);
@@ -877,7 +905,7 @@ export default function GramIntelMap({
     /* Gandipet marker — premium pin positioned at exact coordinates */
     const el = document.createElement("div");
     el.className = "gi-pin";
-    el.innerHTML = `<span class="gi-pin-dot"></span><span class="gi-pin-label">GANDIPET · DEMO</span>`;
+    el.innerHTML = `<span class="gi-pin-dot"></span><span class="gi-pin-label">GANDIPET · ${uiText(langRef.current, "DEMO_PIN")}</span>`;
     const pin = new maplibregl.Marker({ element: el, anchor: "center" })
       .setLngLat(CENTER)
       .addTo(map);
@@ -998,7 +1026,7 @@ export default function GramIntelMap({
       const f = e.features?.[0];
       if (!f) return;
       const p = f.properties;
-      const catLabel = getCategoryLabel(p.category as PlaceCategory);
+      const catLabel = localizedCategoryLabel(langRef.current, p.category);
       popup
         .setLngLat((f.geometry as any).coordinates.slice())
         .setHTML(
@@ -1008,7 +1036,7 @@ export default function GramIntelMap({
                <span>${catLabel}</span>
                <span class="gi-pop-km">${Number(p.distanceKm).toFixed(1)} km</span>
              </div>
-             <div class="gi-pop-status">REAL MAP PLACE · OpenStreetMap</div>
+             <div class="gi-pop-status">${uiText(langRef.current, "REAL_MAP_PLACE")} · OpenStreetMap</div>
            </div>`
         )
         .addTo(map);
@@ -1056,8 +1084,8 @@ export default function GramIntelMap({
         .setHTML(
           `<div class="gi-pop">
              <div class="gi-pop-title">${p.name}</div>
-             <div class="gi-pop-row"><span>${p.category} business</span><span class="gi-pop-km">${Number(p.distanceKm).toFixed(1)} km</span></div>
-             <div class="gi-pop-status">DEMO DATA · simulated for prototype</div>
+             <div class="gi-pop-row"><span>${localizedCategoryLabel(langRef.current, p.category)} · ${uiText(langRef.current, "BUSINESS")}</span><span class="gi-pop-km">${Number(p.distanceKm).toFixed(1)} km</span></div>
+             <div class="gi-pop-status">${uiText(langRef.current, "DEMO_DATA")} · ${uiText(langRef.current, "SIMULATED_FOR_PROTOTYPE")}</div>
            </div>`
         )
         .addTo(map);
@@ -1090,8 +1118,8 @@ export default function GramIntelMap({
       popup.setLngLat((f.geometry as any).coordinates.slice()).setHTML(
         `<div class="gi-pop">
            <div class="gi-pop-title">${f.properties.name}</div>
-           <div class="gi-pop-row"><span>Supply node</span><span class="gi-pop-km">${Number(f.properties.distanceKm).toFixed(1)} km</span></div>
-           <div class="gi-pop-status">DEMO DATA</div>
+           <div class="gi-pop-row"><span>${uiText(langRef.current, "SUPPLY_NODE")}</span><span class="gi-pop-km">${Number(f.properties.distanceKm).toFixed(1)} km</span></div>
+           <div class="gi-pop-status">${uiText(langRef.current, "DEMO_DATA")}</div>
          </div>`
       ).addTo(map);
     });
@@ -1126,7 +1154,7 @@ export default function GramIntelMap({
               borderRadius: 999,
             }}
           >
-            INTERACTIVE MAP OFFLINE · STORY CONTINUES
+            {uiText(lang, "OFFLINE_MAP")}
           </span>
           <span
             className="body-ui"
@@ -1236,14 +1264,14 @@ export default function GramIntelMap({
           <div style={{ textAlign: "center" }}>
             <span className="body-ui" style={{ fontSize: 10, letterSpacing: ".2em", color: "#5f6368", display: "inline-flex", alignItems: "center", gap: 10 }}>
               <span style={{ width: 14, height: 14, border: "2px solid #dadce0", borderTopColor: "#1a73e8", borderRadius: 999, display: "inline-block", animation: "spin 0.9s linear infinite" }} />
-              LOADING MAP · {attemptLabel.toUpperCase()}
+              {uiText(lang, "LOADING_MAP")}
             </span>
           </div>
         </div>
       )}
       {/* category filter chips */}
       {ready && realPlacesCount > 0 && (
-        <div className="gi-filter-bar" role="group" aria-label="Filter places by category">
+        <div className="gi-filter-bar" role="group" aria-label={uiText(lang, "FILTER_PLACES")}>
           {FILTER_CATS.map((c) => (
             <button
               key={c.key}
@@ -1271,43 +1299,43 @@ export default function GramIntelMap({
       )}
       {/* legend — Google white card */}
       {ready && realPlacesCount > 0 && (
-        <div className="gi-legend" aria-label="Map legend">
-          <div className="gi-legend-title">LOCAL PLACES · GANDIPET 8KM</div>
+        <div className="gi-legend" aria-label={uiText(lang, "MAP_LEGEND")}>
+          <div className="gi-legend-title">{uiText(lang, "LOCAL_PLACES")}</div>
           <div className="gi-legend-row">
             <span style={{ width: 8, height: 8, borderRadius: 99, background: getCategoryColor("market"), boxShadow: "0 0 0 2px #fff, 0 1px 3px rgba(0,0,0,.2)" }} />
-            <span>Market</span>
+            <span>{uiText(lang, "MARKET")}</span>
           </div>
           <div className="gi-legend-row">
             <span style={{ width: 8, height: 8, borderRadius: 99, background: getCategoryColor("food"), boxShadow: "0 0 0 2px #fff, 0 1px 3px rgba(0,0,0,.2)" }} />
-            <span>Food</span>
+            <span>{uiText(lang, "FOOD")}</span>
           </div>
           <div className="gi-legend-row" style={{ fontWeight: 600, color: "#202124" }}>
             <span style={{ width: 9, height: 9, borderRadius: 99, background: getCategoryColor("landmark"), boxShadow: "0 0 0 2px #fff, 0 1px 4px rgba(0,0,0,.25)", display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 7 }}>★</span>
-            <span>Famous Places</span>
+            <span>{uiText(lang, "FAMOUS_PLACES")}</span>
           </div>
           <div className="gi-legend-row">
             <span style={{ width: 8, height: 8, borderRadius: 99, background: getCategoryColor("healthcare"), boxShadow: "0 0 0 2px #fff, 0 1px 3px rgba(0,0,0,.2)" }} />
-            <span>Health</span>
+            <span>{uiText(lang, "HEALTH")}</span>
           </div>
           <div className="gi-legend-row">
             <span style={{ width: 8, height: 8, borderRadius: 99, background: getCategoryColor("education"), boxShadow: "0 0 0 2px #fff, 0 1px 3px rgba(0,0,0,.2)" }} />
-            <span>Education</span>
+            <span>{uiText(lang, "EDUCATION")}</span>
           </div>
           <div className="gi-legend-row">
             <span style={{ width: 8, height: 8, borderRadius: 99, background: getCategoryColor("finance"), boxShadow: "0 0 0 2px #fff, 0 1px 3px rgba(0,0,0,.2)" }} />
-            <span>Finance</span>
+            <span>{uiText(lang, "FINANCE")}</span>
           </div>
           <div className="gi-legend-row">
             <span style={{ width: 8, height: 8, borderRadius: 99, background: getCategoryColor("retail"), boxShadow: "0 0 0 2px #fff, 0 1px 3px rgba(0,0,0,.2)" }} />
-            <span>Retail</span>
+            <span>{uiText(lang, "RETAIL")}</span>
           </div>
           <div className="gi-legend-row">
             <span style={{ width: 8, height: 8, borderRadius: 99, background: getCategoryColor("transport"), boxShadow: "0 0 0 2px #fff, 0 1px 3px rgba(0,0,0,.2)" }} />
-            <span>Transport</span>
+            <span>{uiText(lang, "TRANSPORT")}</span>
           </div>
           <div className="gi-legend-row" style={{ marginTop: 6, paddingTop: 6, borderTop: "1px solid #e8eaed", opacity: 0.7 }}>
             <span style={{ width: 8, height: 8, borderRadius: 99, border: "1.5px dashed #5f6368", background: "#fff" }} />
-            <span>Demo data · clustered</span>
+            <span>{uiText(lang, "DEMO_DATA_CLUSTERED")}</span>
           </div>
         </div>
       )}
@@ -1319,7 +1347,7 @@ export default function GramIntelMap({
         <button
           type="button"
           onClick={activateMap}
-          aria-label="Click to interact with map"
+          aria-label={uiText(lang, "CLICK_TO_EXPLORE_MAP")}
           style={{
             position: "absolute",
             inset: 0,
@@ -1350,7 +1378,7 @@ export default function GramIntelMap({
               <path d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5" />
             </svg>
             <span className="body-ui" style={{ fontSize: 10, letterSpacing: ".16em", color: "#202124", fontWeight: 600 }}>
-              CLICK TO EXPLORE MAP
+              {uiText(lang, "CLICK_TO_EXPLORE_MAP")}
             </span>
           </span>
         </button>
@@ -1359,7 +1387,7 @@ export default function GramIntelMap({
         <button
           type="button"
           onClick={deactivateMap}
-          aria-label="Exit map interaction"
+          aria-label={uiText(lang, "EXIT_MAP_INTERACTION")}
           style={{
             position: "absolute",
             top: "calc(var(--nav-h) + 14px)",
