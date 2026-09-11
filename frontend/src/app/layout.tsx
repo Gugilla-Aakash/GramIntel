@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import Script from "next/script";
 import "@fontsource-variable/fraunces";
 import "@fontsource-variable/instrument-sans";
 import "./globals.css";
@@ -38,7 +39,10 @@ export default function RootLayout({
         <link rel="preconnect" href="https://images.pexels.com" />
         <link rel="preconnect" href="https://videos.pexels.com" />
       </head>
-      <body>{children}</body>
+      <body>
+        <Script src="https://js.puter.com/v2/" strategy="afterInteractive" />
+        {children}
+      </body>
     </html>
   );
 }
