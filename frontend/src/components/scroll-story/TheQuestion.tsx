@@ -1,11 +1,15 @@
 "use client";
 
+import { useUiLang } from "@/lib/landing-strings";
+import { uiText } from "@/lib/ui-strings";
+
 /**
  * TheQuestion — now a 40vh pull-quote veil.
  * Kept as standalone fallback; primary mantra lives inside Hero's veil.
  * Height reduced from 240vh pinned dark to minimal 40vh to save a dark beat.
  */
 export function TheQuestion() {
+  const lang = useUiLang();
   return (
     <section
       aria-label="Mantra"
@@ -41,7 +45,7 @@ export function TheQuestion() {
             textWrap: "balance",
           }}
         >
-          Before you borrow, understand what you&apos;re building.
+          {uiText(lang, "VEIL_QUOTE")}
         </p>
       </div>
     </section>
@@ -50,6 +54,7 @@ export function TheQuestion() {
 
 /** Reusable veil quote for embedding inside Hero's veil. */
 export function VeilQuote() {
+  const lang = useUiLang();
   return (
     <div style={{ textAlign: "center", padding: "0 5vw" }}>
       <div
@@ -72,7 +77,7 @@ export function VeilQuote() {
           textWrap: "balance",
         }}
       >
-        Before you borrow, understand what you&apos;re building.
+        {uiText(lang, "VEIL_QUOTE")}
       </p>
     </div>
   );
