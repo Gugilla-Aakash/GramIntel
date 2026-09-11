@@ -149,7 +149,7 @@ export function RuralVideo() {
           </div>
 
           <h2 className="display-xl serif-i" style={{ color: "#F3EFE2", fontSize: "clamp(42px, 7vw, 108px)", lineHeight: 0.92, letterSpacing: "-.025em", textWrap: "balance" }}>
-            Every business<br />
+            {uiText(lang, "EVERY_BUSINESS")}<br />
             {uiText(lang, "STARTS_SOMEWHERE")}
           </h2>
 
