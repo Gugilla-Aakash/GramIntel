@@ -1,0 +1,66 @@
+# monorepo root
+
+# deps
+node_modules/
+.pnp/
+.pnp.js
+.yarn/install-state.gz
+
+# python
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+*.db
+*.sqlite
+*.sqlite3
+
+# next / node build output
+.next/
+out/
+build/
+dist/
+*.tsbuildinfo
+next-env.d.ts
+.turbo/
+.vercel
+
+# env — never commit secrets (frontend has .env.local with keys)
+.env
+.env.*
+!.env.example
+
+# logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+coverage/
+
+# os/editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# opencode plugin state
+session.txt
+Presentation/.~lock.*
+
+# AI coding agents / generated agent artifacts
+AGENTS.md
+opencode.json
+.opencode/
+.superpowers/
+docs/superpowers/
+frontend/docs/superpowers/
+frontend/opencode.json
