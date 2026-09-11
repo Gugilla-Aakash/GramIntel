@@ -8,6 +8,7 @@ import CaseChat from "@/components/portal/CaseChat";
 import { t, tdyn, DATA, CATEGORIES as CATEGORY_LABELS, isWarmBanner, STRINGS, type UiLang } from "@/lib/assistant-strings";
 import { setUiLang } from "@/lib/landing-strings";
 import { categoryText, statusText, uiText } from "@/lib/ui-strings";
+import { translateNarrative, type NarrativeLanguage } from "@/lib/narrative-translator";
 
 const CATEGORIES = ["Dairy", "Retail", "Textile", "Food Processing", "Poultry", "Kirana", "Services", "Food"] as const;
 const LANGUAGES = [
@@ -67,7 +68,7 @@ function AssistantInner() {
     const t = localStorage.getItem("gramintel_token");
     const r = localStorage.getItem("gramintel_role");
     const e = localStorage.getItem("gramintel_email");
-    if (t && r) {
+    if (t && r === "applicant") {
       setToken(t);
       setRole(r);
       if (e) setEmail(e);
@@ -242,18 +243,12 @@ function AssistantInner() {
   };
 
   const switchNarrative = async (lang: string) => {
-    if (!result || !token) return;
+    if (!result?.narrative) return;
     setNarrLang(lang); setNarrLoading(true);
     try {
-      const r = await fetch(`/api/backend/cases/${result.case_id}/narrate`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ language: lang }),
-      });
-      const j = await r.json();
-      if (r.ok && j.narrative) setNarrativeData(j.narrative);
-      else setNarrativeData(result.narrative);
-    } catch { setNarrativeData(result.narrative); }
+      const translated = await translateNarrative(result.narrative, lang as NarrativeLanguage);
+      setNarrativeData(translated);
+    } catch { setNarrativeData(lang === "en" ? result.narrative : null); }
     finally { setNarrLoading(false); }
   };
 
@@ -384,15 +379,23 @@ function AssistantInner() {
           </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 16 }}>
-            <div style={{ display: "flex", gap: 8 }}>
-              {LANGUAGES.map((l) => (
-                <button key={l.code} onClick={() => { setLanguage(l.code); try { localStorage.setItem("gramintel_ui_lang", l.code); window.dispatchEvent(new CustomEvent("gi-lang", { detail: l.code })); } catch {} if (result && token) switchNarrative(l.code); else setNarrLang(l.code); }} className="body-ui" style={{ fontSize: 11, padding: "8px 14px", borderRadius: 999, border: "1px solid var(--line-on-light)", background: language === l.code ? "var(--forest)" : "#fff", color: language === l.code ? "#fff" : "var(--text-dark)" }}>{l.label}</button>
-              ))}
-            </div>
+            <select
+              value={language}
+              onChange={(e) => {
+                const v = e.target.value as UiLang;
+                setLanguage(v);
+                try { localStorage.setItem("gramintel_ui_lang", v); window.dispatchEvent(new CustomEvent("gi-lang", { detail: v })); } catch {}
+                if (result && token) switchNarrative(v); else setNarrLang(v);
+              }}
+              className="body-ui"
+              style={{ fontSize: 12, padding: "8px 12px", borderRadius: 999, border: "1px solid var(--line-on-light)", background: "#fff", color: "var(--text-dark)", cursor: "pointer", outline: "none" }}
+            >
+              {LANGUAGES.map((l) => <option key={l.code} value={l.code}>{l.label}</option>)}
+            </select>
             <span className="body-ui" style={{ fontSize: 10, color: "rgba(20,35,28,0.4)", letterSpacing: ".06em" }}>{t(language as UiLang, "LANG_LABEL")}</span>
           </div>
 
-          <button onClick={analyze} disabled={loading || !token} style={{ marginTop: 18, width: "100%", background: token ? "var(--forest)" : "rgba(20,35,28,0.12)", color: token ? "#fff" : "rgba(20,35,28,0.4)", borderRadius: 999, padding: "14px 18px", fontSize: 13, letterSpacing: ".14em", opacity: loading ? 0.7 : 1 }}>
+          <button onClick={analyze} disabled={loading || !token} style={{ marginTop: 18, background: token ? "var(--forest)" : "rgba(20,35,28,0.12)", color: token ? "#fff" : "rgba(20,35,28,0.4)", borderRadius: 999, padding: "14px 18px", fontSize: 13, letterSpacing: ".14em", opacity: loading ? 0.7 : 1 }}>
             {loading ? t(language as UiLang, "BTN_ANALYZING") : token ? t(language as UiLang, "BTN_ANALYZE") : t(language as UiLang, "BTN_LOGIN_FIRST")}
           </button>
           {banner && <div style={{ marginTop: 12, padding: "10px 14px", borderRadius: 12, background: isWarmBanner(banner) ? "rgba(227,183,91,0.12)" : "rgba(185,28,28,0.06)", border: isWarmBanner(banner) ? "1px solid rgba(227,183,91,0.22)" : "1px solid rgba(185,28,28,0.12)", fontSize: 12, color: isWarmBanner(banner) ? "#7a5a08" : "#7f1d1d" }}>{banner}</div>}
