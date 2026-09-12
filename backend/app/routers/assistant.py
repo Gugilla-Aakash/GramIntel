@@ -14,7 +14,7 @@ router = APIRouter(prefix="/assistant", tags=["assistant"])
 
 @router.post("/analyze")
 def analyze(payload: AnalyzeRequest, user: User = Depends(get_current_user), session: Session = Depends(get_session)):
-    if user.role not in ("applicant", "officer"):
+    if user.role not in ("applicant", "officer", "middleman"):
         raise HTTPException(status_code=403, detail="Only applicants can analyze")
     financial = compute_financial_plan(payload.margin_capital)
 
@@ -42,8 +42,32 @@ def analyze(payload: AnalyzeRequest, user: User = Depends(get_current_user), ses
         lng=payload.lng,
     )
 
+    applicant_id = user.id
+    forwarded_by_id = None
+    farmer_name = None
+    farmer_phone = None
+    farmer_email = None
+    if user.role == "middleman":
+        if not payload.farmer_email:
+            raise HTTPException(status_code=400, detail="farmer_email required for operator filing")
+        farmer = session.exec(select(User).where(User.email == payload.farmer_email)).first()
+        if not farmer:
+            farmer = User(email=payload.farmer_email, role="applicant")
+            session.add(farmer)
+            session.commit()
+            session.refresh(farmer)
+        applicant_id = farmer.id
+        forwarded_by_id = user.id
+        farmer_name = payload.farmer_name
+        farmer_phone = payload.farmer_phone
+        farmer_email = payload.farmer_email
+
     case = Case(
-        applicant_id=user.id,
+        applicant_id=applicant_id,
+        forwarded_by_id=forwarded_by_id,
+        farmer_name=farmer_name,
+        farmer_phone=farmer_phone,
+        farmer_email=farmer_email,
         status=CaseStatus.DRAFT,
         village=payload.village,
         block=payload.block,
