@@ -26,7 +26,9 @@ export function Nav() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [languageOpen, setLanguageOpen] = useState(false);
+  const [loginOpen, setLoginOpen] = useState(false);
   const languageRef = useRef<HTMLDivElement>(null);
+  const loginRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -49,6 +51,22 @@ export function Nav() {
       document.removeEventListener("keydown", closeOnEscape);
     };
   }, [languageOpen]);
+
+  useEffect(() => {
+    if (!loginOpen) return;
+    const closeOnOutside = (event: PointerEvent) => {
+      if (!loginRef.current?.contains(event.target as Node)) setLoginOpen(false);
+    };
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setLoginOpen(false);
+    };
+    document.addEventListener("pointerdown", closeOnOutside);
+    document.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.removeEventListener("pointerdown", closeOnOutside);
+      document.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [loginOpen]);
 
   useEffect(() => {
     const ids = LINKS.map((l) => l.id);
@@ -234,6 +252,38 @@ export function Nav() {
               )}
             </div>
 
+            <div ref={loginRef} className="nav-language" role="group" aria-label={uiText(lang, "LOGIN")}>
+              <button
+                type="button"
+                data-cursor="button"
+                className="body-ui nav-language-trigger"
+                onClick={() => setLoginOpen((open) => !open)}
+                aria-expanded={loginOpen}
+                aria-haspopup="menu"
+              >
+                {uiText(lang, "LOGIN")}
+                <span aria-hidden>{loginOpen ? "⌃" : "⌄"}</span>
+              </button>
+              {loginOpen && (
+                <div className="nav-language-menu" role="menu" aria-label={uiText(lang, "LOGIN")}>
+                  {[
+                    { label: uiText(lang, "APPLICANT_WORKSPACE"), href: "/assistant" },
+                    { label: uiText(lang, "OPERATOR_PORTAL"), href: "/operator" },
+                    { label: uiText(lang, "OFFICER_PORTAL"), href: "/portal" },
+                  ].map((o) => (
+                    <button
+                      key={o.href}
+                      type="button"
+                      role="menuitem"
+                      onClick={() => { setLoginOpen(false); window.location.href = o.href; }}
+                    >
+                      <span>{o.label}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
             <div className="nav-cta">
               <MagneticButton
                 onClick={() => { window.location.href = "/assistant"; }}
@@ -377,6 +427,44 @@ export function Nav() {
                 />
                 {uiText(lang, "LANDING_MAP")}
               </motion.button>
+              {[
+                { label: uiText(lang, "APPLICANT_WORKSPACE"), href: "/assistant" },
+                { label: uiText(lang, "OPERATOR_PORTAL"), href: "/operator" },
+                { label: uiText(lang, "OFFICER_PORTAL"), href: "/portal" },
+              ].map((o, j) => (
+                <motion.button
+                  key={o.href}
+                  initial={{ opacity: 0, x: -12 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.09 + LINKS.length * 0.04 + j * 0.04, duration: 0.3 }}
+                  onClick={() => { setMenuOpen(false); window.location.href = o.href; }}
+                  className="body-ui"
+                  style={{
+                    fontSize: 13,
+                    color: "var(--text-light)",
+                    opacity: 0.85,
+                    textAlign: "left",
+                    padding: "14px 0",
+                    borderBottom: "1px solid var(--line-on-dark)",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 12,
+                    minHeight: 48,
+                  }}
+                >
+                  <motion.span
+                    style={{
+                      width: 5,
+                      height: 5,
+                      borderRadius: 99,
+                      background: "#E3B75B",
+                      display: "inline-block",
+                      flexShrink: 0,
+                    }}
+                  />
+                  {uiText(lang, "LOGIN")} · {o.label}
+                </motion.button>
+              ))}
             </div>
             <div role="group" aria-label={NAV[lang].langLabel} style={{ display: "flex", gap: 8, marginTop: 12 }}>
               {LANG_OPTIONS.map((o) => (
