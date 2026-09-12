@@ -12,6 +12,7 @@ from ..schemas import CreateCaseRequest, NarrateRequest
 from ..services.workflow import can_transition
 from ..services.narrative import generate_narrative
 from ..services.narrative import get_groq_client
+from ..services.access import can_access_case
 
 
 class ChatRequest(BaseModel):
@@ -50,14 +51,14 @@ def list_approved_cases(session: Session = Depends(get_session)):
 
 @router.post("")
 def create_case(payload: CreateCaseRequest, user: User = Depends(get_current_user), session: Session = Depends(get_session)):
-    if user.role != "applicant":
+    if user.role not in ("applicant", "middleman"):
         raise HTTPException(status_code=403, detail="Only applicants can submit cases")
     case_id = payload.case_id
     if case_id is not None:
         case = session.get(Case, case_id)
         if not case:
             raise HTTPException(status_code=404, detail="Case not found")
-        if case.applicant_id != user.id:
+        if not can_access_case(user, case):
             raise HTTPException(status_code=403, detail="Not your case")
         if case.status != CaseStatus.DRAFT:
             raise HTTPException(status_code=400, detail=f"Cannot submit from status {case.status}")
@@ -67,7 +68,8 @@ def create_case(payload: CreateCaseRequest, user: User = Depends(get_current_use
         case.status = CaseStatus.SUBMITTED
         case.updated_at = datetime.utcnow()
         session.add(case)
-        hist = StatusHistory(case_id=case.id, from_status=prev, to_status=CaseStatus.SUBMITTED, actor_user_id=user.id, note="Applicant submitted")
+        note = "Applicant submitted" if user.role == "applicant" else f"Operator {user.email} submitted on behalf of farmer"
+        hist = StatusHistory(case_id=case.id, from_status=prev, to_status=CaseStatus.SUBMITTED, actor_user_id=user.id, note=note)
         session.add(hist)
         session.commit()
         session.refresh(case)
@@ -79,7 +81,7 @@ def get_case(case_id: int, user: User = Depends(get_current_user), session: Sess
     case = session.get(Case, case_id)
     if not case:
         raise HTTPException(status_code=404, detail="Case not found")
-    if user.role == "applicant" and case.applicant_id != user.id:
+    if not can_access_case(user, case):
         raise HTTPException(status_code=403, detail="Not your case")
     feas = session.exec(select(FeasibilityReport).where(FeasibilityReport.case_id == case_id)).first()
     fin = session.exec(select(FinancialPlan).where(FinancialPlan.case_id == case_id)).first()
@@ -135,12 +137,12 @@ def _build_case_summary(case: Case, feas: Optional[FeasibilityReport], fin: Opti
 
 @router.post("/{case_id}/chat")
 def chat_case(case_id: int, payload: ChatRequest, user: User = Depends(get_current_user), session: Session = Depends(get_session)):
-    if user.role not in ("officer", "applicant"):
-        raise HTTPException(status_code=403, detail="Officers and applicants can chat")
+    if user.role not in ("officer", "applicant", "middleman"):
+        raise HTTPException(status_code=403, detail="Officers, applicants and operators can chat")
     case = session.get(Case, case_id)
     if not case:
         raise HTTPException(status_code=404, detail="Case not found")
-    if user.role == "applicant" and case.applicant_id != user.id:
+    if not can_access_case(user, case):
         raise HTTPException(status_code=403, detail="Not your case")
     feas = session.exec(select(FeasibilityReport).where(FeasibilityReport.case_id == case_id)).first()
     fin = session.exec(select(FinancialPlan).where(FinancialPlan.case_id == case_id)).first()
@@ -160,7 +162,7 @@ def narrate_case(case_id: int, payload: NarrateRequest, user: User = Depends(get
     case = session.get(Case, case_id)
     if not case:
         raise HTTPException(status_code=404, detail="Case not found")
-    if user.role == "applicant" and case.applicant_id != user.id:
+    if not can_access_case(user, case):
         raise HTTPException(status_code=403, detail="Not your case")
     fin = session.exec(select(FinancialPlan).where(FinancialPlan.case_id == case_id)).first()
     feas = session.exec(select(FeasibilityReport).where(FeasibilityReport.case_id == case_id)).first()
@@ -217,7 +219,9 @@ def decide_case(case_id: int, payload: dict, user: User = Depends(get_current_us
         feas = session.exec(select(FeasibilityReport).where(FeasibilityReport.case_id == case.id)).first()
         if applicant and applicant.email:
             from ..services.email import send_decision_email
-            send_decision_email(applicant.email, case, fin, feas, target, body.note or "", user.email)
+            operator = session.get(User, case.forwarded_by_id) if case.forwarded_by_id else None
+            farmer_email = case.farmer_email or applicant.email
+            send_decision_email(farmer_email, case, fin, feas, target, body.note or "", user.email, operator.email if operator else None)
     except Exception as e:
         print(f"[Decision Email] failed for case {case.id}: {e}")
     return {"case_id": case.id, "status": case.status, "from": prev, "to": target}
