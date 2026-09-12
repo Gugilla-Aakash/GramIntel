@@ -74,6 +74,18 @@ def test_analyze_creates_case():
     assert j["financial_plan"]["project_cost"] == 1000000
     assert j["feasibility_report"]["market_reach"]["radius_km"] == 10
 
+@pytest.mark.parametrize("lang", ["bn", "mr", "ta"])
+def test_analyze_accepts_new_languages(lang):
+    tok = _auth(f"{lang}-user@test.com", "applicant")
+    r = client.post("/assistant/analyze", json={
+        "village": "Gandipet", "block": "Gandipet", "district": "Hyderabad",
+        "margin_capital": 100000, "business_category": "Dairy", "language": lang
+    }, headers={"Authorization": f"Bearer {tok}"})
+    assert r.status_code == 200
+    j = r.json()
+    assert "case_id" in j
+    assert j["narrative"] is not None
+
 def test_analyze_requires_auth():
     r = client.post("/assistant/analyze", json={
         "village": "Gandipet", "block": "Gandipet", "district": "Hyderabad",
