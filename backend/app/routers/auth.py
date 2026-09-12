@@ -27,8 +27,18 @@ def _admin_emails() -> set:
     return {e.strip().lower() for e in raw.split(",") if e.strip()}
 
 
+def _operator_emails() -> set:
+    raw = settings.OPERATOR_EMAILS or ""
+    return {e.strip().lower() for e in raw.split(",") if e.strip()}
+
+
 def resolve_role(email: str) -> str:
-    return "officer" if (email or "").strip().lower() in _admin_emails() else "applicant"
+    lowered = (email or "").strip().lower()
+    if lowered in _admin_emails():
+        return "officer"
+    if lowered in _operator_emails():
+        return "middleman"
+    return "applicant"
 
 
 def _generate_code() -> str:
@@ -212,7 +222,7 @@ def oauth_google_authorize(role: str = "applicant", redirect: str = None):
             status_code=400,
             detail="Google OAuth not configured. Set GOOGLE_CLIENT_ID/SECRET.",
         )
-    if role not in ("applicant", "officer"):
+    if role not in ("applicant", "officer", "middleman"):
         role = "applicant"
     state = secrets.token_urlsafe(24)
     _oauth_states[state] = (role, datetime.utcnow() + timedelta(minutes=10), redirect)

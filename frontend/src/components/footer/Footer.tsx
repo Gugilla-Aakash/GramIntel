@@ -30,8 +30,10 @@ const COLS: { h: string; links: FooterLink[] }[] = [
     h: "CONNECT",
     links: [
       { label: "Smart India Hackathon", href: "https://www.sih.gov.in", external: true },
-      { label: "Team GramIntel", href: "mailto:team@gramintel.local" },
-      { label: "Contact", href: "mailto:team@gramintel.local" },
+      { label: "Team GramIntel", href: "mailto:gugillaaakash6@gmail.com" },
+      { label: "Contact", href: "mailto:gugillaaakash6@gmail.com" },
+      { label: "Customer care", href: "mailto:gugillaaakash6@gmail.com" },
+      { label: "Legal", href: "/legal" },
     ],
   },
 ];
@@ -129,7 +131,7 @@ export function Footer() {
                           textAlign: "left",
                         }}
                       >
-                        {uiText(lang, l.label === "The Method" ? "THE_METHOD" : l.label === "Market Intelligence" ? "MARKET_INTELLIGENCE" : l.label === "Scheme Router" ? "SCHEME_ROUTER" : l.label === "Repayment Planner" ? "REPAYMENT_PLANNER" : l.label === "The Problem" ? "THE_PROBLEM_LINK" : l.label === "Data Sources" ? "DATA_SOURCES" : l.label === "Impact Model" ? "IMPACT_MODEL" : l.label === "For Lenders" ? "FOR_LENDERS" : l.label === "Team GramIntel" ? "TEAM_GRAMINTEL" : l.label === "Contact" ? "CONTACT" : l.label === "Smart India Hackathon" ? "SMART_INDIA_HACKATHON" : l.label)}
+                        {uiText(lang, l.label === "The Method" ? "THE_METHOD" : l.label === "Market Intelligence" ? "MARKET_INTELLIGENCE" : l.label === "Scheme Router" ? "SCHEME_ROUTER" : l.label === "Repayment Planner" ? "REPAYMENT_PLANNER" : l.label === "The Problem" ? "THE_PROBLEM_LINK" : l.label === "Data Sources" ? "DATA_SOURCES" : l.label === "Impact Model" ? "IMPACT_MODEL" : l.label === "For Lenders" ? "FOR_LENDERS" : l.label === "Team GramIntel" ? "TEAM_GRAMINTEL" : l.label === "Contact" ? "CONTACT" : l.label === "Customer care" ? "CUSTOMER_CARE" : l.label === "Legal" ? "LEGAL" : l.label === "Smart India Hackathon" ? "SMART_INDIA_HACKATHON" : l.label)}
                       </button>
                     );
                   }
@@ -148,7 +150,7 @@ export function Footer() {
                         color: "rgba(237,234,223,.68)",
                       }}
                     >
-                      {uiText(lang, l.label === "The Method" ? "THE_METHOD" : l.label === "Market Intelligence" ? "MARKET_INTELLIGENCE" : l.label === "Scheme Router" ? "SCHEME_ROUTER" : l.label === "Repayment Planner" ? "REPAYMENT_PLANNER" : l.label === "The Problem" ? "THE_PROBLEM_LINK" : l.label === "Data Sources" ? "DATA_SOURCES" : l.label === "Impact Model" ? "IMPACT_MODEL" : l.label === "For Lenders" ? "FOR_LENDERS" : l.label === "Team GramIntel" ? "TEAM_GRAMINTEL" : l.label === "Contact" ? "CONTACT" : l.label === "Smart India Hackathon" ? "SMART_INDIA_HACKATHON" : l.label)}
+                      {uiText(lang, l.label === "The Method" ? "THE_METHOD" : l.label === "Market Intelligence" ? "MARKET_INTELLIGENCE" : l.label === "Scheme Router" ? "SCHEME_ROUTER" : l.label === "Repayment Planner" ? "REPAYMENT_PLANNER" : l.label === "The Problem" ? "THE_PROBLEM_LINK" : l.label === "Data Sources" ? "DATA_SOURCES" : l.label === "Impact Model" ? "IMPACT_MODEL" : l.label === "For Lenders" ? "FOR_LENDERS" : l.label === "Team GramIntel" ? "TEAM_GRAMINTEL" : l.label === "Contact" ? "CONTACT" : l.label === "Customer care" ? "CUSTOMER_CARE" : l.label === "Legal" ? "LEGAL" : l.label === "Smart India Hackathon" ? "SMART_INDIA_HACKATHON" : l.label)}
                     </a>
                   );
                 })}

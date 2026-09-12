@@ -1,13 +1,11 @@
 "use client";
 
 import { Suspense, useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { searchPlaces } from "@/lib/geocode";
 import CaseChat from "@/components/portal/CaseChat";
-import { t, tdyn, DATA, CATEGORIES as CATEGORY_LABELS, isWarmBanner, STRINGS, UI_LANG_CODES, isUiLang, type UiLang } from "@/lib/assistant-strings";
+import { t, tdyn, DATA, CATEGORIES as CATEGORY_LABELS, isWarmBanner, isUiLang, type UiLang } from "@/lib/assistant-strings";
 import { setUiLang } from "@/lib/landing-strings";
-import { categoryText, statusText, uiText } from "@/lib/ui-strings";
+import { statusText, uiText } from "@/lib/ui-strings";
 import { translateNarrative, type NarrativeLanguage } from "@/lib/narrative-translator";
 
 const CATEGORIES = ["Dairy", "Retail", "Textile", "Food Processing", "Poultry", "Kirana", "Services", "Food"] as const;
@@ -32,16 +30,15 @@ type AnalyzeResponse = {
   source: string;
 };
 
-export default function AssistantPage() {
+export default function OperatorPage() {
   return (
     <Suspense>
-      <AssistantInner />
+      <OperatorInner />
     </Suspense>
   );
 }
 
-function AssistantInner() {
-  const searchParams = useSearchParams();
+function OperatorInner() {
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
   const [token, setToken] = useState<string | null>(null);
@@ -55,6 +52,9 @@ function AssistantInner() {
   const [district, setDistrict] = useState("Hyderabad");
   const [margin, setMargin] = useState("100000");
   const [category, setCategory] = useState("Dairy");
+  const [farmerName, setFarmerName] = useState("");
+  const [farmerPhone, setFarmerPhone] = useState("");
+  const [farmerEmail, setFarmerEmail] = useState("");
   const [language, setLanguage] = useState("en");
   const [loading, setLoading] = useState(false);
   const [banner, setBanner] = useState<string | null>(null);
@@ -64,14 +64,14 @@ function AssistantInner() {
   const [narrLoading, setNarrLoading] = useState(false);
   const [applyState, setApplyState] = useState<"idle" | "submitting" | "done" | "error">("idle");
   const [applyMsg, setApplyMsg] = useState("");
-  const [myCases, setMyCases] = useState<any[]>([]);
+  const [forwarded, setForwarded] = useState<any[]>([]);
   const [openChatId, setOpenChatId] = useState<number | null>(null);
 
   useEffect(() => {
     const t = localStorage.getItem("gramintel_token");
     const r = localStorage.getItem("gramintel_role");
     const e = localStorage.getItem("gramintel_email");
-    if (t && r === "applicant") {
+    if (t && r === "middleman") {
       setToken(t);
       setRole(r);
       if (e) setEmail(e);
@@ -82,84 +82,6 @@ function AssistantInner() {
       setNarrativeLang(ul);
     }
   }, []);
-
-  useEffect(() => {
-    const v = searchParams.get("village");
-    if (v) { setVillage(v); setBlock(v); }
-    const b = searchParams.get("block");
-    if (b) setBlock(b);
-    const d = searchParams.get("district");
-    if (d) setDistrict(d);
-    const m = searchParams.get("margin");
-    if (m && /^\d+$/.test(m)) setMargin(m);
-    const c = searchParams.get("category");
-    if (c && (CATEGORIES as readonly string[]).includes(c)) setCategory(c);
-    const lang = searchParams.get("language");
-    if (lang && isUiLang(lang)) setLanguage(lang);
-  }, [searchParams]);
-
-  useEffect(() => {
-    setBanner((prev) => {
-      if (!prev) return prev;
-      for (const k of ["BANNER_DEMO", "BANNER_LOCATING", "MSG_FILL_LOCATION", "MSG_BAD_MARGIN", "MSG_LOGIN_FIRST"] as const) {
-        if (UI_LANG_CODES.some((l) => STRINGS[l][k] === prev)) {
-          return t(language as UiLang, k);
-        }
-      }
-      return prev;
-    });
-  }, [language]);
-
-  useEffect(() => {
-    if (token) return;
-    const cid = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
-    if (!cid) return;
-    const id = "gis-client";
-    if (document.getElementById(id)) return;
-    // @ts-ignore
-    if ((window as any).__gis_initialized) return;
-    const s = document.createElement("script");
-    s.id = id;
-    s.src = "https://accounts.google.com/gsi/client";
-    s.async = true;
-    s.defer = true;
-    s.onload = () => {
-      try {
-        // @ts-ignore
-        if (!window.google?.accounts?.id) return;
-        // @ts-ignore
-        if ((window as any).__gis_initialized) return;
-        // @ts-ignore
-        (window as any).__gis_initialized = true;
-        // @ts-ignore
-        window.google.accounts.id.initialize({
-          client_id: cid,
-          callback: async (resp: any) => {
-            try {
-              const r = await fetch("/api/backend/auth/oauth/google/id_token", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ credential: resp.credential, role: "applicant" }),
-              });
-              const j = await r.json();
-              if (!r.ok) throw new Error(uiText(language as UiLang, "GOOGLE_SIGNIN_FAILED"));
-              persistAuth(j.access_token, j.role, j.email);
-            } catch {
-              setAuthErr(uiText(language as UiLang, "GOOGLE_SIGNIN_FAILED"));
-            }
-          },
-          auto_select: false,
-          cancel_on_tap_outside: false,
-        });
-        // @ts-ignore
-        window.google.accounts.id.prompt();
-      } catch (e) {
-        console.warn("[GIS] init failed", e);
-      }
-    };
-    s.onerror = () => console.warn("[GIS] gsi/client failed to load");
-    document.head.appendChild(s);
-  }, [token]);
 
   const persistAuth = (tok: string, rl: string, em: string) => {
     localStorage.setItem("gramintel_token", tok);
@@ -181,8 +103,7 @@ function AssistantInner() {
     if (!email) { setAuthErr(uiText(language as UiLang, "ENTER_EMAIL")); return; }
     setAuthLoading(true); setAuthErr("");
     try {
-      const r = await fetch("/api/backend/auth/otp/request", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email, role: "applicant" }) });
-      const j = await r.json();
+      const r = await fetch("/api/backend/auth/otp/request", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email, role: "middleman" }) });
       if (!r.ok) throw new Error(uiText(language as UiLang, "FAILED"));
       setAuthStep("verify");
     } catch { setAuthErr(uiText(language as UiLang, "FAILED")); }
@@ -196,66 +117,60 @@ function AssistantInner() {
       const r = await fetch("/api/backend/auth/otp/verify", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email, code: otp }) });
       const j = await r.json();
       if (!r.ok) throw new Error(uiText(language as UiLang, "INVALID_CODE"));
+      if (j.role !== "middleman") throw new Error(t(language as UiLang, "OP_NOT_OPERATOR"));
       persistAuth(j.access_token, j.role, email);
       setAuthStep("request");
       setOtp("");
-    } catch { setAuthErr(uiText(language as UiLang, "INVALID_CODE")); }
+    } catch (e: any) { setAuthErr(e?.message || uiText(language as UiLang, "INVALID_CODE")); }
     finally { setAuthLoading(false); }
   };
 
-  const fetchMyCases = async (tok: string) => {
+  const fetchForwarded = async (tok: string) => {
     try {
-      const r = await fetch("/api/backend/applicant/me/cases", { headers: { Authorization: `Bearer ${tok}` } });
-      if (r.ok) { const j = await r.json(); setMyCases(j.cases || []); }
+      const r = await fetch("/api/backend/operator/me/cases", { headers: { Authorization: `Bearer ${tok}` } });
+      if (r.ok) { const j = await r.json(); setForwarded(j.cases || []); }
     } catch {}
   };
 
-  useEffect(() => { if (token) fetchMyCases(token); }, [token, result]);
+  useEffect(() => { if (token) fetchForwarded(token); }, [token, result]);
 
   const analyze = async () => {
     const m = parseInt(margin, 10);
     if (!village || !block || !district) { setBanner(t(language as UiLang, "MSG_FILL_LOCATION")); return; }
     if (!m || m <= 0) { setBanner(t(language as UiLang, "MSG_BAD_MARGIN")); return; }
+    if (!farmerEmail) { setBanner(t(language as UiLang, "MSG_FARMER_EMAIL")); return; }
     if (!token) { setBanner(t(language as UiLang, "MSG_LOGIN_FIRST")); return; }
     setLoading(true); setBanner(t(language as UiLang, "BANNER_LOCATING")); setResult(null); setNarrativeData(null); setApplyState("idle");
     try {
-      let lat: number | undefined;
-      let lng: number | undefined;
-      try {
-        const g = await searchPlaces(`${village}, ${district}`);
-        if (g[0] && Number.isFinite(g[0].lat) && Number.isFinite(g[0].lng)) { lat = g[0].lat; lng = g[0].lng; }
-      } catch {}
-      const payload: Record<string, unknown> = { village, block, district, margin_capital: m, business_category: category, language };
-      if (lat !== undefined && lng !== undefined) { payload.lat = lat; payload.lng = lng; }
       const r = await fetch("/api/backend/assistant/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({
+          village, block, district, margin_capital: m, business_category: category, language,
+          farmer_email: farmerEmail, farmer_name: farmerName || undefined, farmer_phone: farmerPhone || undefined,
+        }),
       });
       const j = await r.json();
-      if (!r.ok) throw new Error(uiText(language as UiLang, "FAILED"));
+      if (!r.ok) throw new Error((j && j.detail) || uiText(language as UiLang, "FAILED"));
       setResult(j);
       setNarrativeData(j.narrative || null);
       setNarrativeLang(language);
-      if (j.source === "seeded") setBanner(t(language as UiLang, "BANNER_DEMO"));
-      else if (j.feasibility_report?.source === "seeded") setBanner(t(language as UiLang, "BANNER_DEMO"));
+      if (j.source === "seeded" || j.feasibility_report?.source === "seeded") setBanner(t(language as UiLang, "BANNER_DEMO"));
       else setBanner(null);
     } catch (e: any) {
-      setBanner(uiText(language as UiLang, "FAILED"));
+      setBanner(e?.message || uiText(language as UiLang, "FAILED"));
     } finally { setLoading(false); }
   };
 
   const switchNarrative = async (lang: string) => {
     if (!result?.narrative) return;
-    setNarrLang(lang); setNarrLoading(true);
+    setNarrativeLang(lang); setNarrLoading(true);
     try {
       const translated = await translateNarrative(result.narrative, lang as NarrativeLanguage);
       setNarrativeData(translated);
     } catch { setNarrativeData(lang === "en" ? result.narrative : null); }
     finally { setNarrLoading(false); }
   };
-
-  const setNarrLang = (l: string) => setNarrativeLang(l);
 
   const apply = async () => {
     if (!result || !token) return;
@@ -266,10 +181,9 @@ function AssistantInner() {
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ case_id: result.case_id }),
       });
-      const j = await r.json();
       if (!r.ok) throw new Error(uiText(language as UiLang, "FAILED"));
       setApplyState("done"); setApplyMsg(t(language as UiLang, "APPLY_DONE").replace("{id}", String(result.case_id)));
-      fetchMyCases(token);
+      fetchForwarded(token);
     } catch { setApplyState("error"); setApplyMsg(uiText(language as UiLang, "FAILED")); }
   };
 
@@ -279,12 +193,12 @@ function AssistantInner() {
         <div className="shell" style={{ height: 64, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <Link href="/" style={{ display: "flex", alignItems: "baseline", gap: 8, color: "#fff" }}>
             <span style={{ fontFamily: "var(--font-display)", fontSize: 20, fontStyle: "italic", fontWeight: 600 }}>GramIntel</span>
-            <span style={{ fontSize: 9, letterSpacing: ".2em", opacity: 0.5 }}>{uiText(language as UiLang, "ASSISTANT")}</span>
+            <span style={{ fontSize: 9, letterSpacing: ".2em", opacity: 0.5 }}>{uiText(language as UiLang, "OPERATOR_PORTAL")}</span>
           </Link>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <Link href="/map" style={{ fontSize: 11, letterSpacing: ".12em", color: "rgba(255,255,255,0.65)", border: "1px solid rgba(255,255,255,0.18)", borderRadius: 999, padding: "8px 14px" }}>{uiText(language as UiLang, "MAP")}</Link>
             <Link href="/portal" style={{ fontSize: 11, letterSpacing: ".12em", color: "rgba(255,255,255,0.65)", border: "1px solid rgba(255,255,255,0.18)", borderRadius: 999, padding: "8px 14px" }}>{uiText(language as UiLang, "OFFICER_PORTAL")}</Link>
-            <div aria-label={uiText(language as UiLang, "LANGUAGE")} style={{ display: "flex", gap: 3 }}>{LANGUAGES.map(({ code, label }) => <button key={code} type="button" onClick={() => { setLanguage(code); setUiLang(code); if (result && token) switchNarrative(code); else setNarrLang(code); }} aria-pressed={language === code} style={{ color: "#fff", background: language === code ? "rgba(255,255,255,0.2)" : "transparent", border: "1px solid rgba(255,255,255,0.16)", borderRadius: 999, padding: "6px 8px", fontSize: 10, cursor: "pointer" }}>{label}</button>)}</div>
+            <div aria-label={uiText(language as UiLang, "LANGUAGE")} style={{ display: "flex", gap: 3 }}>{LANGUAGES.map(({ code, label }) => <button key={code} type="button" onClick={() => { setLanguage(code); setUiLang(code); if (result && token) switchNarrative(code); else setNarrativeLang(code); }} aria-pressed={language === code} style={{ color: "#fff", background: language === code ? "rgba(255,255,255,0.2)" : "transparent", border: "1px solid rgba(255,255,255,0.16)", borderRadius: 999, padding: "6px 8px", fontSize: 10, cursor: "pointer" }}>{label}</button>)}</div>
             {token ? (
               <button onClick={clearAuth} style={{ fontSize: 11, letterSpacing: ".08em", color: "#fff", background: "rgba(255,255,255,0.08)", borderRadius: 999, padding: "8px 14px", border: "1px solid rgba(255,255,255,0.12)" }}>{uiText(language as UiLang, "LOGOUT")}</button>
             ) : null}
@@ -294,10 +208,10 @@ function AssistantInner() {
 
       <main className="shell" style={{ paddingTop: 32, paddingBottom: 64 }}>
         <div style={{ maxWidth: 760 }}>
-          <p className="eyebrow" style={{ color: "var(--forest)" }}>{t(language as UiLang, "APP_EYEBROW")}</p>
-          <h1 className="display-m" style={{ marginTop: 8 }}>{t(language as UiLang, "APP_TITLE_A")}<span className="serif-i" style={{ color: "var(--forest)" }}>{t(language as UiLang, "APP_TITLE_B")}</span></h1>
+          <p className="eyebrow" style={{ color: "var(--forest)" }}>{t(language as UiLang, "OP_EYEBROW")}</p>
+          <h1 className="display-m" style={{ marginTop: 8 }}>{t(language as UiLang, "OP_TITLE_A")}<span className="serif-i" style={{ color: "var(--forest)" }}>{t(language as UiLang, "OP_TITLE_B")}</span></h1>
           <p className="body-lg" style={{ color: "var(--muted-on-light)", marginTop: 12, maxWidth: 640 }}>
-            {t(language as UiLang, "APP_SUB")}
+            {t(language as UiLang, "OP_SUB")}
           </p>
         </div>
 
@@ -305,11 +219,10 @@ function AssistantInner() {
           <section className="no-print" style={{ marginTop: 28, maxWidth: 560, background: "#fff", border: "1px solid var(--line-on-light)", borderRadius: 16, padding: 20, boxShadow: "0 4px 24px rgba(20,35,28,0.06)" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
               <span style={{ width: 8, height: 8, borderRadius: 99, background: "#22c55e", display: "inline-block" }} />
-              <span className="body-ui" style={{ fontSize: 11, letterSpacing: ".14em", color: "var(--text-dark)" }}>{t(language as UiLang, "LOGIN_TITLE")}</span>
+              <span className="body-ui" style={{ fontSize: 11, letterSpacing: ".14em", color: "var(--text-dark)" }}>{t(language as UiLang, "OP_LOGIN_TITLE")}</span>
               <span className="body-ui" style={{ marginLeft: "auto", fontSize: 10, color: "rgba(20,35,28,0.4)", background: "var(--warm)", border: "1px solid var(--line-on-light)", padding: "4px 8px", borderRadius: 999 }}>{t(language as UiLang, "LOGIN_SECURE")}</span>
             </div>
-            <button onClick={() => (window.location.href = "/api/backend/auth/oauth/google/authorize?role=applicant")} style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 10, background: "#fff", border: "1px solid #dadce0", borderRadius: 999, padding: "11px 18px", fontSize: 13, fontWeight: 500, cursor: "pointer", boxShadow: "0 1px 2px rgba(0,0,0,0.06)" }}>
-              <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C34.7 33.1 30 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3 0 5.7 1.1 7.8 2.9l5.7-5.7C34.5 6.1 29.5 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20c11 0 20-8.9 20-20 0-1.3-.1-2.3-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.5 16.1 18.9 14 24 14c3 0 5.7 1.1 7.8 2.9l5.7-5.7C34.5 6.1 29.5 4 24 4 16.3 4 9.7 8.2 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.4 0 10.3-2 13.7-5.2l-6.3-5.2C29.9 35.4 27.1 36 24 36c-6 0-10.7-2.9-11.7-7.1l-6.7 5.2C8.9 39.8 15.9 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-1 2.7-3.2 4.9-6 6.1l6.3 5.2c4.1-3.8 6.3-9.4 6.3-15.3 0-1.3-.1-2.3-.4-3.5z"/></svg>
+            <button onClick={() => (window.location.href = "/api/backend/auth/oauth/google/authorize?role=middleman")} style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 10, background: "#fff", border: "1px solid #dadce0", borderRadius: 999, padding: "11px 18px", fontSize: 13, fontWeight: 500, cursor: "pointer", boxShadow: "0 1px 2px rgba(0,0,0,0.06)" }}>
               {t(language as UiLang, "LOGIN_GOOGLE")}
             </button>
             <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "14px 0 2px" }}>
@@ -335,7 +248,6 @@ function AssistantInner() {
                 </>
               )}
               {authErr && <p style={{ fontSize: 12, color: "#b91c1c", background: "rgba(185,28,28,0.06)", padding: "8px 12px", borderRadius: 10 }}>{authErr}</p>}
-              <p style={{ fontSize: 11, color: "rgba(20,35,28,0.45)", lineHeight: 1.5 }}>{uiText(language as UiLang, "OTP_HELP")}</p>
             </div>
           </section>
         ) : (
@@ -381,6 +293,24 @@ function AssistantInner() {
             </div>
           </div>
 
+          <div style={{ marginTop: 16, background: "var(--warm)", border: "1px solid var(--line-on-light)", borderRadius: 14, padding: 16 }}>
+            <p className="body-ui" style={{ fontSize: 10, letterSpacing: ".12em", color: "rgba(20,35,28,0.45)", marginBottom: 12 }}>{t(language as UiLang, "FARMER_TITLE")}</p>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 14 }}>
+              <div style={{ display: "grid", gap: 6 }}>
+                <label className="body-ui" style={{ fontSize: 10, letterSpacing: ".1em" }}>{t(language as UiLang, "F_NAME")}</label>
+                <input value={farmerName} onChange={(e) => setFarmerName(e.target.value)} style={{ padding: "11px 12px", borderRadius: 12, border: "1px solid var(--line-on-light)", background: "#fff" }} />
+              </div>
+              <div style={{ display: "grid", gap: 6 }}>
+                <label className="body-ui" style={{ fontSize: 10, letterSpacing: ".1em" }}>{t(language as UiLang, "F_PHONE")}</label>
+                <input value={farmerPhone} onChange={(e) => setFarmerPhone(e.target.value)} inputMode="tel" style={{ padding: "11px 12px", borderRadius: 12, border: "1px solid var(--line-on-light)", background: "#fff" }} />
+              </div>
+              <div style={{ display: "grid", gap: 6 }}>
+                <label className="body-ui" style={{ fontSize: 10, letterSpacing: ".1em" }}>{t(language as UiLang, "F_EMAIL")}</label>
+                <input value={farmerEmail} onChange={(e) => setFarmerEmail(e.target.value)} placeholder="farmer@example.com" style={{ padding: "11px 12px", borderRadius: 12, border: "1px solid var(--line-on-light)", background: "#fff" }} />
+              </div>
+            </div>
+          </div>
+
           <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 16 }}>
             <select
               value={language}
@@ -388,7 +318,7 @@ function AssistantInner() {
                 const v = e.target.value as UiLang;
                 setLanguage(v);
                 try { localStorage.setItem("gramintel_ui_lang", v); window.dispatchEvent(new CustomEvent("gi-lang", { detail: v })); } catch {}
-                if (result && token) switchNarrative(v); else setNarrLang(v);
+                if (result && token) switchNarrative(v); else setNarrativeLang(v);
               }}
               className="body-ui"
               style={{ fontSize: 12, padding: "8px 12px", borderRadius: 999, border: "1px solid var(--line-on-light)", background: "#fff", color: "var(--text-dark)", cursor: "pointer", outline: "none" }}
@@ -404,59 +334,19 @@ function AssistantInner() {
           {banner && <div style={{ marginTop: 12, padding: "10px 14px", borderRadius: 12, background: isWarmBanner(banner) ? "rgba(227,183,91,0.12)" : "rgba(185,28,28,0.06)", border: isWarmBanner(banner) ? "1px solid rgba(227,183,91,0.22)" : "1px solid rgba(185,28,28,0.12)", fontSize: 12, color: isWarmBanner(banner) ? "#7a5a08" : "#7f1d1d" }}>{banner}</div>}
         </section>
 
-        {loading && (
-          <div className="no-print" style={{ marginTop: 24, display: "grid", gap: 14 }}>
-            {[1, 2].map((i) => (
-              <div key={i} style={{ height: 120, borderRadius: 16, background: "linear-gradient(90deg, #F3EFE2 25%, #EDE8D9 37%, #F3EFE2 63%)", backgroundSize: "400% 100%", animation: "shimmer 1.2s infinite" }} />
-            ))}
-          </div>
-        )}
-
         {result && !loading && (
           <div className="gi-report" style={{ marginTop: 28, display: "grid", gap: 22 }}>
             <section style={{ background: "#fff", border: "1px solid var(--line-on-light)", borderRadius: 20, padding: 22 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
                 <span className="body-ui" style={{ fontSize: 10, letterSpacing: ".14em", color: "var(--forest)", border: "1px solid rgba(11,93,59,0.22)", padding: "4px 8px", borderRadius: 999, background: "rgba(11,93,59,0.06)" }}>{uiText(language as UiLang, "FEASIBILITY_SIGNALS")}</span>
                 <span className="body-ui" style={{ marginLeft: "auto", fontSize: 11, color: "rgba(20,35,28,0.5)" }}>{formatINR(result.financial_plan.project_cost)} {t(language as UiLang, "PROJECT_WORD")} · {formatINR(result.financial_plan.max_loan)} {t(language as UiLang, "LOAN_WORD")}</span>
-                <button type="button" onClick={() => window.print()} className="body-ui gi-print-btn" style={{ fontSize: 11, padding: "6px 14px", borderRadius: 999, border: "1px solid var(--forest)", color: "var(--forest)", background: "#fff", letterSpacing: ".08em", flexShrink: 0 }}>{t(language as UiLang, "BTN_PRINT")}</button>
               </div>
-
-              {result.feasibility_report?.dataset_integration && (
-                <div style={{
-                  display: "flex",
-                  alignItems: "flex-start",
-                  gap: 10,
-                  padding: "10px 14px",
-                  borderRadius: 12,
-                  background: result.feasibility_report.dataset_integration.status === "actual_data" ? "rgba(11,93,59,0.06)" : "rgba(227,183,91,0.1)",
-                  border: `1px solid ${result.feasibility_report.dataset_integration.status === "actual_data" ? "rgba(11,93,59,0.22)" : "rgba(227,183,91,0.28)"}`,
-                  marginBottom: 14,
-                  fontSize: 11,
-                  lineHeight: 1.5,
-                  color: result.feasibility_report.dataset_integration.status === "actual_data" ? "var(--forest)" : "#8a6a2f"
-                }}>
-                  <span style={{ fontSize: 13, fontWeight: 700, whiteSpace: "nowrap" }}>
-                    {result.feasibility_report.dataset_integration.status === "actual_data" ? `✓ ${uiText(language as UiLang, "VERIFIED_GOVERNMENT_DATA")}` : `ⓘ ${uiText(language as UiLang, "REGIONAL_FALLBACK")}`}
-                  </span>
-                  <div>
-                    {result.feasibility_report.dataset_integration.status === "actual_data" ? (
-                      <>
-                        {uiText(language as UiLang, "GROUNDED_IN")} <strong>{result.feasibility_report.dataset_integration.demographics_source}</strong> ({result.feasibility_report.dataset_integration.village_matched} · {uiText(language as UiLang, "POPULATION")}: {result.feasibility_report.dataset_integration.population?.toLocaleString("en-IN")}, {result.feasibility_report.dataset_integration.households?.toLocaleString("en-IN")} {uiText(language as UiLang, "HOUSEHOLDS")}{result.feasibility_report.dataset_integration.dairy_cooperatives ? `, ${result.feasibility_report.dataset_integration.dairy_cooperatives} ${uiText(language as UiLang, "DAIRY_COOPS")}` : ""}{result.feasibility_report.dataset_integration.active_shgs ? `, ${result.feasibility_report.dataset_integration.active_shgs} ${uiText(language as UiLang, "ACTIVE_SHGS")}` : ""}) &amp; <strong>{result.feasibility_report.dataset_integration.benchmark_source}</strong>.
-                      </>
-                    ) : (
-                      <>
-                        {uiText(language as UiLang, "REGIONAL_FALLBACK_NOTE")}
-                      </>
-                    )}
-                  </div>
-                </div>
-              )}
 
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(240px,1fr))", gap: 14 }}>
                 <div style={{ background: "var(--warm)", border: "1px solid var(--line-on-light)", borderRadius: 14, padding: 16 }}>
                   <p className="body-ui" style={{ fontSize: 10, letterSpacing: ".12em", color: "rgba(20,35,28,0.45)" }}>{t(language as UiLang, "R_MARKET")}</p>
                   <p style={{ fontFamily: "var(--font-display)", fontSize: 22, marginTop: 6 }}>{result.feasibility_report.market_reach.estimated_consumers.toLocaleString("en-IN")} {t(language as UiLang, "CONSUMERS_WORD")}</p>
-                  <p style={{ fontSize: 12, color: "rgba(20,35,28,0.55)", marginTop: 4 }}>{result.feasibility_report.competitor_map.count} {t(language as UiLang, "COMPETITORS_WORD")} · {result.feasibility_report.competitor_map.density_per_km2}/km² · {t(language as UiLang, "AVG_WORD")} {result.feasibility_report.market_reach.avg_distance_km} km</p>
+                  <p style={{ fontSize: 12, color: "rgba(20,35,28,0.55)", marginTop: 4 }}>{result.feasibility_report.competitor_map.count} {t(language as UiLang, "COMPETITORS_WORD")} · {result.feasibility_report.competitor_map.density_per_km2}/km²</p>
                   <p style={{ fontSize: 11, color: "rgba(20,35,28,0.45)", marginTop: 8 }}>{t(language as UiLang, "CHANNELS_LABEL")} {result.feasibility_report.market_reach.channels.slice(0, 4).map((ch: string) => tdyn(language as UiLang, ch)).join(" · ")}</p>
                 </div>
 
@@ -464,47 +354,8 @@ function AssistantInner() {
                   <p className="body-ui" style={{ fontSize: 10, letterSpacing: ".12em", color: "rgba(20,35,28,0.45)" }}>{t(language as UiLang, "R_OPPORTUNITY")}</p>
                   <p style={{ fontSize: 13, fontWeight: 600, marginTop: 6 }}>{result.feasibility_report.opportunity_analysis.top_niche?.niche ? tdyn(language as UiLang, result.feasibility_report.opportunity_analysis.top_niche.niche) : ""}</p>
                   <p style={{ fontSize: 11, color: "rgba(20,35,28,0.55)", marginTop: 4 }}>{result.feasibility_report.opportunity_analysis.top_niche?.reason ? tdyn(language as UiLang, result.feasibility_report.opportunity_analysis.top_niche.reason) : ""}</p>
-                  <div style={{ marginTop: 10, display: "grid", gap: 6 }}>
-                    {result.feasibility_report.opportunity_analysis.niches.slice(0, 2).map((n: any) => (
-                      <div key={n.niche} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 11 }}>
-                        <span style={{ width: 36, textAlign: "center", background: "var(--forest)", color: "#fff", borderRadius: 999, padding: "2px 6px", fontSize: 10 }}>{n.score}</span> {tdyn(language as UiLang, n.niche)}
-                      </div>
-                    ))}
-                  </div>
                 </div>
 
-                <div style={{ background: "var(--warm)", border: "1px solid var(--line-on-light)", borderRadius: 14, padding: 16 }}>
-                  <p className="body-ui" style={{ fontSize: 10, letterSpacing: ".12em", color: "rgba(20,35,28,0.45)" }}>{t(language as UiLang, "R_VALUE")}</p>
-                  <p style={{ fontFamily: "var(--font-display)", fontSize: 22, marginTop: 6 }}>{result.feasibility_report.product_market_value.suggested_band}</p>
-                  <p style={{ fontSize: 11, color: "rgba(20,35,28,0.55)", marginTop: 4 }}>{t(language as UiLang, "MEDIAN_WORD")} ₹{result.feasibility_report.product_market_value.pricing.median} · {tdyn(language as UiLang, result.feasibility_report.product_market_value.pricing.unit)}</p>
-                  <p style={{ fontSize: 11, color: "rgba(20,35,28,0.45)", marginTop: 6 }}>{tdyn(language as UiLang, result.feasibility_report.product_market_value.regional_purchasing_power)}</p>
-                </div>
-              </div>
-
-              {result.financial_plan.working_capital && result.financial_plan.scheme !== "INELIGIBLE" && (
-                <div style={{ background: "var(--warm)", border: "1px solid var(--line-on-light)", borderRadius: 14, padding: 16, marginTop: 14 }}>
-                  <p className="body-ui" style={{ fontSize: 10, letterSpacing: ".12em", color: "rgba(20,35,28,0.45)" }}>{t(language as UiLang, "R_WORKING_CAP")}</p>
-                  <p style={{ fontFamily: "var(--font-display)", fontSize: 22, marginTop: 6 }}>{formatINR(result.financial_plan.working_capital.working_capital_3mo)}</p>
-                  <p style={{ fontSize: 11, color: "rgba(20,35,28,0.55)", marginTop: 4 }}>{t(language as UiLang, "WC_3MO")}</p>
-                  <div style={{ marginTop: 10, display: "grid", gap: 6, fontSize: 12 }}>
-                    <div style={{ display: "flex", justifyContent: "space-between" }}><span style={{ color: "rgba(20,35,28,0.55)" }}>{t(language as UiLang, "WC_MONTHLY_OPEX")}</span><span>{formatINR(result.financial_plan.working_capital.monthly_opex_estimate)}</span></div>
-                    <div style={{ display: "flex", justifyContent: "space-between" }}><span style={{ color: "rgba(20,35,28,0.55)" }}>{t(language as UiLang, "WC_CONTINGENCY")}</span><span>{formatINR(result.financial_plan.working_capital.contingency_10pct)}</span></div>
-                    <div style={{ display: "flex", justifyContent: "space-between" }}><span style={{ color: "rgba(20,35,28,0.55)" }}>{t(language as UiLang, "WC_FIRST_YEAR")}</span><span>{formatINR(result.financial_plan.working_capital.first_year_outlay)}</span></div>
-                  </div>
-                  <p style={{ fontSize: 10, color: "rgba(20,35,28,0.45)", marginTop: 8 }}>{result.financial_plan.working_capital.note ? tdyn(language as UiLang, result.financial_plan.working_capital.note) : t(language as UiLang, "WC_NOTE_DEFAULT")}</p>
-                </div>
-              )}
-
-              <div style={{ marginTop: 14, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
-                <div style={{ background: "#fff", border: "1px solid var(--line-on-light)", borderRadius: 14, padding: 16 }}>
-                  <p className="body-ui" style={{ fontSize: 10, letterSpacing: ".12em" }}>{t(language as UiLang, "R_SWOT")}</p>
-                  <div style={{ display: "grid", gap: 8, marginTop: 8, fontSize: 11, lineHeight: 1.5 }}>
-                    <div><strong style={{ color: "var(--forest)" }}>S:</strong> {result.feasibility_report.swot.strengths.slice(0, 2).map((s: string) => tdyn(language as UiLang, s)).join(" · ")}</div>
-                    <div><strong style={{ color: "#8a6a2f" }}>W:</strong> {result.feasibility_report.swot.weaknesses.map((s: string) => tdyn(language as UiLang, s)).join(" · ")}</div>
-                    <div><strong>O:</strong> {result.feasibility_report.swot.opportunities.slice(0, 2).map((s: string) => tdyn(language as UiLang, s)).join(" · ")}</div>
-                    <div><strong style={{ color: "#991b1b" }}>T:</strong> {result.feasibility_report.threats.slice(0, 2).map((s: string) => tdyn(language as UiLang, s)).join(" · ")}</div>
-                  </div>
-                </div>
                 <div style={{ background: "var(--ink)", color: "var(--text-light)", borderRadius: 14, padding: 16 }}>
                   <p className="body-ui" style={{ fontSize: 10, letterSpacing: ".12em", color: "var(--gold-bright)" }}>{t(language as UiLang, "VIABILITY_SCORE")}</p>
                   <div style={{ display: "flex", alignItems: "baseline", gap: 12, marginTop: 8 }}>
@@ -513,27 +364,12 @@ function AssistantInner() {
                   </div>
                   <div style={{ marginTop: 10, display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px 12px" }}>
                     {result.feasibility_report.viability.factors.map((f: any) => (
-                      <div key={f.label} style={{ display: "flex", justifyContent: "space-between", fontSize: 10, opacity: f.label === "RISK EXPOSURE" ? 0.6 : 1 }}>
+                      <div key={f.label} style={{ display: "flex", justifyContent: "space-between", fontSize: 10 }}>
                         <span className="body-ui" style={{ fontSize: 9, letterSpacing: ".06em" }}>{DATA[language as UiLang]?.[f.label] ?? f.label}</span><span className="mono-num">{f.v}</span>
                       </div>
                     ))}
                   </div>
-                  <p className="body-ui" style={{ fontSize: 9, color: "rgba(237,234,223,0.45)", marginTop: 10, letterSpacing: ".04em", textTransform: "none" }}>demand 0.30 · supply 0.20 · pricing 0.15 · competition 0.15 · finance 0.10 · risk 0.10</p>
                 </div>
-              </div>
-
-              <div style={{ marginTop: 14, display: "flex", gap: 8, flexWrap: "wrap" }}>
-                <span className="body-ui" style={{ fontSize: 10, color: "rgba(20,35,28,0.45)", background: "var(--warm)", border: "1px solid var(--line-on-light)", padding: "6px 10px", borderRadius: 999 }}>{t(language as UiLang, "PILL_COMP_MAP")} {tdyn(language as UiLang, result.feasibility_report.competitor_map.note)}</span>
-                <span className="body-ui" style={{ fontSize: 10, color: "rgba(20,35,28,0.45)", background: "var(--warm)", border: "1px solid var(--line-on-light)", padding: "6px 10px", borderRadius: 999 }}>{t(language as UiLang, "PILL_THREATS")} {result.feasibility_report.threats.map((x: string) => tdyn(language as UiLang, x)).join(" · ")}</span>
-                {result.feasibility_report.dataset_integration?.dairy_cooperatives && (
-                  <span className="body-ui" style={{ fontSize: 10, color: "var(--forest)", background: "rgba(11,93,59,0.06)", border: "1px solid rgba(11,93,59,0.2)", padding: "6px 10px", borderRadius: 999 }}>{result.feasibility_report.dataset_integration.dairy_cooperatives} {uiText(language as UiLang, "DAIRY_COOPS")}</span>
-                )}
-                {result.feasibility_report.dataset_integration?.active_shgs && (
-                  <span className="body-ui" style={{ fontSize: 10, color: "var(--forest)", background: "rgba(11,93,59,0.06)", border: "1px solid rgba(11,93,59,0.2)", padding: "6px 10px", borderRadius: 999 }}>{result.feasibility_report.dataset_integration.active_shgs} {uiText(language as UiLang, "ACTIVE_SHGS")}</span>
-                )}
-                {result.feasibility_report.dataset_integration?.power_supply_hours && (
-                  <span className="body-ui" style={{ fontSize: 10, color: "rgba(20,35,28,0.45)", background: "var(--warm)", border: "1px solid var(--line-on-light)", padding: "6px 10px", borderRadius: 999 }}>⚡ {result.feasibility_report.dataset_integration.power_supply_hours}h {uiText(language as UiLang, "POWER_GRID")}</span>
-                )}
               </div>
             </section>
 
@@ -586,7 +422,6 @@ function AssistantInner() {
                     </tbody>
                   </table>
                 </div>
-                <p className="body-ui" style={{ fontSize: 9, color: "rgba(20,35,28,0.4)", padding: "8px 14px", borderTop: "1px solid var(--line-on-light)", letterSpacing: ".04em", textTransform: "none" }}>{t(language as UiLang, "EMI_FORMULA").replace("{loan}", formatINR(result.financial_plan.max_loan)).replace("{rate}", String(result.financial_plan.interest_rate)).replace("{mora}", String(result.financial_plan.moratorium_months)).replace("{emi}", formatINR(result.financial_plan.emi_monthly)).replace("{qtr}", formatINR(result.financial_plan.emi_quarterly)).replace("{n}", String(result.financial_plan.tenure_months))}</p>
               </div>
             </section>
 
@@ -625,24 +460,22 @@ function AssistantInner() {
           </div>
         )}
 
-        {myCases.length > 0 && (
+        {forwarded.length > 0 && (
           <section className="no-print" style={{ background: "#fff", border: "1px solid var(--line-on-light)", borderRadius: 16, padding: 16, marginTop: 20 }}>
-            <p className="body-ui" style={{ fontSize: 10, letterSpacing: ".12em", marginBottom: 10 }}>{t(language as UiLang, "R_CASES")}</p>
+            <p className="body-ui" style={{ fontSize: 10, letterSpacing: ".12em", marginBottom: 10 }}>{t(language as UiLang, "R_FORWARDED")} ({forwarded.length})</p>
             <div style={{ display: "grid", gap: 8 }}>
-              {myCases.slice(0, 5).map((c) => (
+              {forwarded.slice(0, 10).map((c) => (
                 <div key={c.id}>
                   <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", borderRadius: 12, background: "var(--warm)", border: "1px solid var(--line-on-light)", fontSize: 12 }}>
-                    <span style={{ fontWeight: 700 }}>#{c.id}</span> <span>{c.village} · {categoryText(language as UiLang, c.business_category)}</span> <span style={{ marginLeft: "auto", background: c.status === "APPROVED" ? "var(--forest)" : c.status === "REJECTED" ? "#7f1d1d" : "#fff", color: c.status === "APPROVED" ? "#fff" : c.status === "REJECTED" ? "#fff" : "var(--text-dark)", padding: "4px 8px", borderRadius: 999, fontSize: 10, border: "1px solid var(--line-on-light)" }}>{statusText(language as UiLang, c.status)}</span>
-                    <button
-                      onClick={() => setOpenChatId((prev) => (prev === c.id ? null : c.id))}
-                      style={{ background: openChatId === c.id ? "var(--forest)" : "#fff", color: openChatId === c.id ? "#fff" : "var(--ink)", border: "1px solid var(--line-on-light)", borderRadius: 999, padding: "6px 12px", fontSize: 11, cursor: "pointer", whiteSpace: "nowrap" }}
-                    >
-                      {openChatId === c.id ? "✕" : t(language as UiLang, "CHAT_BTN")}
-                    </button>
+                    <span style={{ fontWeight: 700 }}>{t(language as UiLang, "CASE_WORD")}{c.id}</span>
+                    <span style={{ color: "rgba(20,35,28,0.55)" }}>{c.village} · {c.business_category}</span>
+                    <span style={{ color: "rgba(20,35,28,0.55)" }}>{t(language as UiLang, "FARMER_WORD")}: {c.farmer_name || c.farmer_email}</span>
+                    <span className="body-ui" style={{ marginLeft: "auto", fontSize: 10, letterSpacing: ".08em", background: "#fff", padding: "4px 10px", borderRadius: 999, border: "1px solid var(--line-on-light)" }}>{statusText(language as UiLang, c.status)}</span>
+                    <button onClick={() => setOpenChatId(openChatId === c.id ? null : c.id)} className="body-ui" style={{ fontSize: 11, padding: "6px 12px", borderRadius: 999, background: "var(--ink)", color: "#fff", border: "none", cursor: "pointer" }}>{t(language as UiLang, "CHAT_BTN")}</button>
                   </div>
-                  {openChatId === c.id && token && (
-                    <div style={{ marginTop: 8, height: "56vh" }}>
-                      <CaseChat caseId={c.id} token={token} detail={null} language={language} />
+                  {openChatId === c.id && (
+                    <div style={{ marginTop: 8 }}>
+                      <CaseChat caseId={c.id} token={token} detail={result && result.case_id === c.id ? result : null} language={language} />
                     </div>
                   )}
                 </div>
@@ -650,14 +483,7 @@ function AssistantInner() {
             </div>
           </section>
         )}
-
-        {!result && !loading && (
-          <div className="no-print" style={{ marginTop: 32, padding: 20, borderRadius: 16, background: "rgba(227,183,91,0.08)", border: "1px solid rgba(227,183,91,0.18)", fontSize: 12, lineHeight: 1.6, color: "#7a5a08" }}>
-            {t(language as UiLang, "EMPTY_STATE")}
-          </div>
-        )}
       </main>
-      <style>{`@keyframes shimmer{0%{background-position:-400% 0}100%{background-position:400% 0}}`}</style>
     </div>
   );
 }

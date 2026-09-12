@@ -9,6 +9,7 @@ def utcnow():
 class UserRole(str, Enum):
     applicant = "applicant"
     officer = "officer"
+    middleman = "middleman"
 
 class CaseStatus(str, Enum):
     DRAFT = "DRAFT"
@@ -33,6 +34,10 @@ class Case(SQLModel, table=True):
     __tablename__ = "cases"
     id: Optional[int] = Field(default=None, primary_key=True)
     applicant_id: int = Field(foreign_key="users.id", index=True)
+    forwarded_by_id: Optional[int] = Field(default=None, foreign_key="users.id", index=True)
+    farmer_name: Optional[str] = None
+    farmer_phone: Optional[str] = None
+    farmer_email: Optional[str] = None
     status: str = Field(default=CaseStatus.DRAFT)
     village: str
     block: str
