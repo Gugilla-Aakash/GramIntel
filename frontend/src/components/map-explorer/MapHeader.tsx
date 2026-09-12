@@ -42,9 +42,9 @@ export default function MapHeader() {
             )}
           </div>
           <div className="gi-lang-switcher" aria-label={uiText(lang, "LANGUAGE")}>
-            {(["en", "hi", "te"] as const).map((code) => (
+            {([["en", "EN"], ["hi", "हि"], ["te", "తె"], ["bn", "বাং"], ["mr", "म"], ["ta", "த"]] as const).map(([code, label]) => (
               <button key={code} type="button" onClick={() => setUiLang(code)} aria-pressed={lang === code}>
-                {code === "en" ? "EN" : code === "hi" ? "हि" : "తె"}
+                {label}
               </button>
             ))}
           </div>
@@ -119,9 +119,9 @@ export default function MapHeader() {
             )}
           </nav>
           <div className="gi-lang-switcher" aria-label={uiText(lang, "LANGUAGE")}>
-            {(["en", "hi", "te"] as const).map((code) => (
+            {([["en", "EN"], ["hi", "हि"], ["te", "తె"], ["bn", "বাং"], ["mr", "म"], ["ta", "த"]] as const).map(([code, label]) => (
               <button key={code} type="button" onClick={() => setUiLang(code)} aria-pressed={lang === code}>
-                {code === "en" ? "EN" : code === "hi" ? "हि" : "తె"}
+                {label}
               </button>
             ))}
           </div>
