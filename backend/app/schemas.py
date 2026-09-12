@@ -16,12 +16,12 @@ class AnalyzeRequest(BaseModel):
     district: str = Field(min_length=1)
     margin_capital: int = Field(gt=0)
     business_category: str = Field(min_length=1)
-    language: str = Field(default="en", pattern="^(en|hi|te)$")
+    language: str = Field(default="en", pattern="^(en|hi|te|bn|mr|ta)$")
     lat: Optional[float] = None
     lng: Optional[float] = None
 
 class NarrateRequest(BaseModel):
-    language: str = Field(default="en", pattern="^(en|hi|te)$")
+    language: str = Field(default="en", pattern="^(en|hi|te|bn|mr|ta)$")
 
 class CreateCaseRequest(BaseModel):
     case_id: Optional[int] = None
