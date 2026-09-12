@@ -619,6 +619,7 @@ function AssistantInner() {
               <button onClick={apply} disabled={applyState === "submitting" || applyState === "done"} style={{ background: applyState === "done" ? "#fff" : "var(--gold)", color: "#071A14", borderRadius: 999, padding: "14px 22px", fontSize: 13, letterSpacing: ".1em", fontWeight: 700, opacity: applyState === "submitting" ? 0.7 : 1 }}>
                 {applyState === "done" ? t(language as UiLang, "ST_SUBMITTED") : applyState === "submitting" ? t(language as UiLang, "ST_SUBMITTING") : `${t(language as UiLang, "BTN_SUBMIT")}${result.case_id}`}
               </button>
+              <p style={{ fontSize: 11, color: "rgba(255,255,255,0.55)", marginTop: 8, flexBasis: "100%" }}>{uiText(language as UiLang, "TERMS_NOTE")} <Link href="/legal" style={{ color: "var(--gold-bright)", textDecoration: "underline" }}>{uiText(language as UiLang, "LEGAL_READ")}</Link></p>
             </section>
             {applyMsg && <p className="no-print" style={{ fontSize: 12, padding: "10px 14px", borderRadius: 12, background: applyState === "done" ? "rgba(34,197,94,0.08)" : "rgba(185,28,28,0.06)", border: applyState === "done" ? "1px solid rgba(34,197,94,0.18)" : "1px solid rgba(185,28,28,0.12)", color: applyState === "done" ? "#166534" : "#7f1d1d" }}>{applyMsg}</p>}
           </div>
