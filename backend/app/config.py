@@ -20,6 +20,8 @@ class Settings(BaseSettings):
     GOOGLE_CLIENT_ID: Optional[str] = None
     GOOGLE_CLIENT_SECRET: Optional[str] = None
     ADMIN_EMAILS: str = ""
+    OPERATOR_EMAILS: str = "gugillaaakash6@gmail.com"
+    CUSTOMER_CARE_EMAIL: str = "gugillaaakash6@gmail.com"
     OAUTH_REDIRECT_URI: str = "http://localhost:8000/auth/oauth/callback"
     FRONTEND_URL: str = "http://localhost:3000"
     ENV: str = "dev"
