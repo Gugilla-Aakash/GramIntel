@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { searchPlaces } from "@/lib/geocode";
 import CaseChat from "@/components/portal/CaseChat";
-import { t, tdyn, DATA, CATEGORIES as CATEGORY_LABELS, isWarmBanner, STRINGS, type UiLang } from "@/lib/assistant-strings";
+import { t, tdyn, DATA, CATEGORIES as CATEGORY_LABELS, isWarmBanner, STRINGS, UI_LANG_CODES, isUiLang, type UiLang } from "@/lib/assistant-strings";
 import { setUiLang } from "@/lib/landing-strings";
 import { categoryText, statusText, uiText } from "@/lib/ui-strings";
 import { translateNarrative, type NarrativeLanguage } from "@/lib/narrative-translator";
@@ -15,6 +15,9 @@ const LANGUAGES = [
   { code: "en", label: "EN" },
   { code: "hi", label: "हि" },
   { code: "te", label: "తె" },
+  { code: "bn", label: "বাং" },
+  { code: "mr", label: "म" },
+  { code: "ta", label: "த" },
 ] as const;
 
 function formatINR(n: number) {
@@ -74,7 +77,7 @@ function AssistantInner() {
       if (e) setEmail(e);
     }
     const ul = localStorage.getItem("gramintel_ui_lang");
-    if (ul === "en" || ul === "hi" || ul === "te") {
+    if (ul && isUiLang(ul)) {
       setLanguage(ul);
       setNarrativeLang(ul);
     }
@@ -92,14 +95,14 @@ function AssistantInner() {
     const c = searchParams.get("category");
     if (c && (CATEGORIES as readonly string[]).includes(c)) setCategory(c);
     const lang = searchParams.get("language");
-    if (lang === "en" || lang === "hi" || lang === "te") setLanguage(lang);
+    if (lang && isUiLang(lang)) setLanguage(lang);
   }, [searchParams]);
 
   useEffect(() => {
     setBanner((prev) => {
       if (!prev) return prev;
       for (const k of ["BANNER_DEMO", "BANNER_LOCATING", "MSG_FILL_LOCATION", "MSG_BAD_MARGIN", "MSG_LOGIN_FIRST"] as const) {
-        if ((["en", "hi", "te"] as UiLang[]).some((l) => STRINGS[l][k] === prev)) {
+        if (UI_LANG_CODES.some((l) => STRINGS[l][k] === prev)) {
           return t(language as UiLang, k);
         }
       }
@@ -281,7 +284,7 @@ function AssistantInner() {
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <Link href="/map" style={{ fontSize: 11, letterSpacing: ".12em", color: "rgba(255,255,255,0.65)", border: "1px solid rgba(255,255,255,0.18)", borderRadius: 999, padding: "8px 14px" }}>{uiText(language as UiLang, "MAP")}</Link>
             <Link href="/portal" style={{ fontSize: 11, letterSpacing: ".12em", color: "rgba(255,255,255,0.65)", border: "1px solid rgba(255,255,255,0.18)", borderRadius: 999, padding: "8px 14px" }}>{uiText(language as UiLang, "OFFICER_PORTAL")}</Link>
-            <div aria-label={uiText(language as UiLang, "LANGUAGE")} style={{ display: "flex", gap: 3 }}>{(["en", "hi", "te"] as const).map((code) => <button key={code} type="button" onClick={() => { setLanguage(code); setUiLang(code); if (result && token) switchNarrative(code); else setNarrLang(code); }} aria-pressed={language === code} style={{ color: "#fff", background: language === code ? "rgba(255,255,255,0.2)" : "transparent", border: "1px solid rgba(255,255,255,0.16)", borderRadius: 999, padding: "6px 8px", fontSize: 10, cursor: "pointer" }}>{code === "en" ? "EN" : code === "hi" ? "हि" : "తె"}</button>)}</div>
+            <div aria-label={uiText(language as UiLang, "LANGUAGE")} style={{ display: "flex", gap: 3 }}>{LANGUAGES.map(({ code, label }) => <button key={code} type="button" onClick={() => { setLanguage(code); setUiLang(code); if (result && token) switchNarrative(code); else setNarrLang(code); }} aria-pressed={language === code} style={{ color: "#fff", background: language === code ? "rgba(255,255,255,0.2)" : "transparent", border: "1px solid rgba(255,255,255,0.16)", borderRadius: 999, padding: "6px 8px", fontSize: 10, cursor: "pointer" }}>{label}</button>)}</div>
             {token ? (
               <button onClick={clearAuth} style={{ fontSize: 11, letterSpacing: ".08em", color: "#fff", background: "rgba(255,255,255,0.08)", borderRadius: 999, padding: "8px 14px", border: "1px solid rgba(255,255,255,0.12)" }}>{uiText(language as UiLang, "LOGOUT")}</button>
             ) : null}
@@ -591,8 +594,8 @@ function AssistantInner() {
               <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
                 <span className="body-ui" style={{ fontSize: 11, letterSpacing: ".12em" }}>{t(language as UiLang, "R_NARRATIVES")} — {narrativeLang.toUpperCase()}</span>
                 <div style={{ marginLeft: "auto", display: "flex", gap: 8 }}>
-                  {(["en", "hi", "te"] as const).map((l) => (
-                    <button key={l} onClick={() => switchNarrative(l)} disabled={narrLoading} className="body-ui" style={{ fontSize: 11, padding: "6px 12px", borderRadius: 999, background: narrativeLang === l ? "var(--forest)" : "#fff", color: narrativeLang === l ? "#fff" : "var(--text-dark)", border: "1px solid var(--line-on-light)" }}>{l === "en" ? "EN" : l === "hi" ? "हि" : "తె"}</button>
+                  {LANGUAGES.map(({ code, label }) => (
+                    <button key={code} onClick={() => switchNarrative(code)} disabled={narrLoading} className="body-ui" style={{ fontSize: 11, padding: "6px 12px", borderRadius: 999, background: narrativeLang === code ? "var(--forest)" : "#fff", color: narrativeLang === code ? "#fff" : "var(--text-dark)", border: "1px solid var(--line-on-light)" }}>{label}</button>
                   ))}
                 </div>
               </div>
