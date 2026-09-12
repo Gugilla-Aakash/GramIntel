@@ -280,3 +280,107 @@ def test_dataset_exploration_endpoints():
     r_sch = client.get("/assistant/datasets/schemes")
     assert r_sch.status_code == 200
     assert len(r_sch.json()["schemes"]) >= 2
+
+
+def test_decision_mail_points_to_customer_care():
+    from backend.app.services.email import decision_bodies
+    from backend.app.config import settings
+    assert settings.CUSTOMER_CARE_EMAIL == "gugillaaakash6@gmail.com"
+
+    class FakeCase:
+        id = 1
+        village = "Gandipet"
+        block = "Gandipet"
+        district = "Hyderabad"
+        business_category = "Dairy"
+        margin_capital = 100000
+        language = "en"
+
+    class FakeFin:
+        project_cost = 1000000
+        max_loan = 900000
+        scheme = "TERM"
+        interest_rate = 8.0
+        tenure_months = 84
+        moratorium_months = 6
+        emi_monthly = 14028
+        emi_quarterly = 42084
+
+    class FakeFeas:
+        payload_json = '{"viability": {"score": 72, "grade": "B"}}'
+
+    text, html = decision_bodies(FakeCase(), FakeFin(), FakeFeas(), "APPROVED", "ok", "officer@test.com")
+    assert "gugillaaakash6@gmail.com" in text
+    assert "gugillaaakash6@gmail.com" in html
+
+
+def test_middleman_allowlist_role_resolution():
+    from backend.app.routers.auth import resolve_role
+    from backend.app.config import settings
+    settings.OPERATOR_EMAILS = "mitra@test.com"
+    settings.ADMIN_EMAILS = "admin@test.com"
+    assert resolve_role("admin@test.com") == "officer"
+    assert resolve_role("mitra@test.com") == "middleman"
+    assert resolve_role("farmer@test.com") == "applicant"
+
+
+def test_operator_end_to_end_forwarded_case():
+    applicant_tok = _auth("farmer2@test.com", "applicant")
+    from backend.app.config import settings
+    settings.OPERATOR_EMAILS = "mitra2@test.com"
+    mitra_tok = _auth("mitra2@test.com", "middleman")
+    r = client.post("/assistant/analyze", json={
+        "village": "Gandipet", "block": "Gandipet", "district": "Hyderabad",
+        "margin_capital": 100000, "business_category": "Dairy", "language": "en",
+        "farmer_email": "farmer2@test.com", "farmer_name": "Ravi", "farmer_phone": "9000000001",
+    }, headers={"Authorization": f"Bearer {mitra_tok}"})
+    assert r.status_code == 200
+    case_id = r.json()["case_id"]
+    mine = client.get("/operator/me/cases", headers={"Authorization": f"Bearer {mitra_tok}"})
+    assert mine.status_code == 200
+    assert any(c["id"] == case_id for c in mine.json()["cases"])
+    farmer_view = client.get("/applicant/me/cases", headers={"Authorization": f"Bearer {applicant_tok}"})
+    assert any(c["id"] == case_id for c in farmer_view.json()["cases"])
+
+
+def test_second_operator_cannot_see_case():
+    from backend.app.config import settings
+    settings.OPERATOR_EMAILS = "mitra2@test.com,other@test.com"
+    mitra_tok = _auth("mitra2@test.com", "middleman")
+    other_tok = _auth("other@test.com", "middleman")
+    r = client.post("/assistant/analyze", json={
+        "village": "Gandipet", "block": "Gandipet", "district": "Hyderabad",
+        "margin_capital": 100000, "business_category": "Dairy", "language": "en",
+        "farmer_email": "farmer2@test.com",
+    }, headers={"Authorization": f"Bearer {mitra_tok}"})
+    case_id = r.json()["case_id"]
+    denied = client.get(f"/cases/{case_id}", headers={"Authorization": f"Bearer {other_tok}"})
+    assert denied.status_code == 403
+    mine = client.get("/operator/me/cases", headers={"Authorization": f"Bearer {other_tok}"})
+    assert all(c["id"] != case_id for c in mine.json()["cases"])
+
+
+def test_decision_mails_farmer_and_operator():
+    from backend.app.config import settings
+    settings.OPERATOR_EMAILS = "mitra3@test.com"
+    applicant_tok = _auth("farmer3@test.com", "applicant")
+    officer_tok = _auth("admin@test.com", "officer")
+    mitra_tok = _auth("mitra3@test.com", "middleman")
+    r = client.post("/assistant/analyze", json={
+        "village": "Gandipet", "block": "Gandipet", "district": "Hyderabad",
+        "margin_capital": 100000, "business_category": "Dairy", "language": "en",
+        "farmer_email": "farmer3@test.com",
+    }, headers={"Authorization": f"Bearer {mitra_tok}"})
+    case_id = r.json()["case_id"]
+    client.post("/cases", json={"case_id": case_id}, headers={"Authorization": f"Bearer {mitra_tok}"})
+    sent = []
+    import backend.app.services.email as email_mod
+    orig = email_mod._send_email
+    email_mod._send_email = lambda to, subj, tb, hb: sent.append(to) or False
+    try:
+        d = client.post(f"/cases/{case_id}/decision", json={"decision": "APPROVED", "note": "Looks good"},
+                        headers={"Authorization": f"Bearer {officer_tok}"})
+        assert d.status_code == 200
+    finally:
+        email_mod._send_email = orig
+    assert "farmer3@test.com" in sent and "mitra3@test.com" in sent
