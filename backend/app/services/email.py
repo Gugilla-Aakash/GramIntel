@@ -17,6 +17,8 @@ def _send_email(to_email: str, subject: str, text_body: str, html_body: str) -> 
         msg["From"] = settings.SMTP_FROM or settings.SMTP_USER
         msg["To"] = to_email
         msg["Subject"] = subject
+        if settings.CUSTOMER_CARE_EMAIL:
+            msg["Reply-To"] = settings.CUSTOMER_CARE_EMAIL
         msg.attach(MIMEText(text_body, "plain"))
         msg.attach(MIMEText(html_body, "html"))
         ctx = ssl.create_default_context()
@@ -69,6 +71,7 @@ Decision: {decision} by {officer_email}
 Reason: {note or "(no reason provided)"}
 Language: {lang}
 Login to view full report: {settings.FRONTEND_URL}/assistant
+Questions? Write to customer care: {settings.CUSTOMER_CARE_EMAIL}
 """
     html = f"""\
 <!DOCTYPE html>
@@ -108,7 +111,7 @@ Login to view full report: {settings.FRONTEND_URL}/assistant
             <div style="margin-top:18px;text-align:center;">
               <a href="{settings.FRONTEND_URL}/assistant" style="display:inline-block;background:#0B5D3B;color:#fff;text-decoration:none;border-radius:999px;padding:11px 22px;font-size:13px;font-weight:600;">View full report</a>
             </div>
-            <p style="margin:16px 0 0;color:#9ca3af;font-size:11px;text-align:center;">Case #{case.id} · Language {lang} · Reply to this email for queries.</p>
+            <p style="margin:16px 0 0;color:#9ca3af;font-size:11px;text-align:center;">Case #{case.id} · Language {lang} · Questions? Write to customer care: {settings.CUSTOMER_CARE_EMAIL}</p>
           </td></tr>
         </table>
       </td></tr>
@@ -117,7 +120,13 @@ Login to view full report: {settings.FRONTEND_URL}/assistant
 </html>"""
     return text, html
 
-def send_decision_email(applicant_email: str, case, financial, feasibility, decision: str, note: str, officer_email: str):
+def send_decision_email(applicant_email: str, case, financial, feasibility, decision: str, note: str, officer_email: str, operator_email: str | None = None):
     subject = f"GramIntel — Case #{case.id} { 'Approved ✓' if decision=='APPROVED' else 'Rejected' } — {case.village} {case.business_category}"
     text, html = decision_bodies(case, financial, feasibility, decision, note, officer_email)
-    return _send_email(applicant_email, subject, text, html)
+    recipients = [applicant_email]
+    if operator_email and operator_email != applicant_email:
+        recipients.append(operator_email)
+    ok = True
+    for to in recipients:
+        ok = _send_email(to, subject, text, html) and ok
+    return ok
