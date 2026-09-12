@@ -15,7 +15,7 @@ export function Multilingual() {
   const lang = useUiLang();
   const ref = useRef<HTMLDivElement>(null);
   const [idx, setIdx] = useState(0);
-  const word = lang === "hi" ? "हिन्दी" : lang === "te" ? "తెలుగు" : "English";
+  const word = lang === "hi" ? "हिन्दी" : lang === "te" ? "తెలుగు" : lang === "bn" ? "বাংলা" : lang === "mr" ? "मराठी" : lang === "ta" ? "தமிழ்" : "English";
   const visualWords = [word, "GramIntel", "₹"];
 
   const { scrollYProgress: p } = useScroll({
