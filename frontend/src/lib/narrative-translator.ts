@@ -1,4 +1,4 @@
-export type NarrativeLanguage = "en" | "hi" | "te";
+export type NarrativeLanguage = "en" | "hi" | "te" | "bn" | "mr" | "ta";
 
 type Narrative = Record<string, any>;
 
@@ -23,6 +23,9 @@ const inFlight = new Map<string, Promise<Narrative>>();
 const LANGUAGE_NAMES: Record<Exclude<NarrativeLanguage, "en">, string> = {
   hi: "Hindi (हिन्दी)",
   te: "Telugu (తెలుగు)",
+  bn: "Bengali (বাংলা)",
+  mr: "Marathi (मराठी)",
+  ta: "Tamil (தமிழ்)",
 };
 
 function responseText(response: PuterChatResponse | string) {
