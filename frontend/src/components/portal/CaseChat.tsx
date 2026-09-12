@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 
 import Markdown from "./Markdown";
-import { t } from "@/lib/assistant-strings";
+import { t, isUiLang } from "@/lib/assistant-strings";
 import type { UiLang } from "@/lib/assistant-strings";
 
 interface Msg {
@@ -31,7 +31,7 @@ export default function CaseChat({
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const abortRef = useRef<AbortController | null>(null);
 
-  const lang = (["en", "hi", "te"].includes(language) ? language : "en") as UiLang;
+  const lang = (isUiLang(language) ? language : "en") as UiLang;
 
   useEffect(() => {
     if (!caseId) return;
