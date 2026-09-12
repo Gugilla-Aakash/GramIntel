@@ -54,7 +54,7 @@ function PolarAreaChart({ p, prefersReduced }: { p: ReturnType<typeof useScroll>
   const lang = useUiLang();
   const [explained, setExplained] = useState("");
   const [loadingLang, setLoadingLang] = useState<string | null>(null);
-  const explain = async (language: "hi" | "te") => {
+  const explain = async (language: "hi" | "te" | "bn" | "mr" | "ta") => {
     setLoadingLang(language);
     try {
       const r = await fetch("/api/explain", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ lang: language }) });
@@ -176,9 +176,12 @@ function PolarAreaChart({ p, prefersReduced }: { p: ReturnType<typeof useScroll>
           </div>
         ))}
       </div>
-      <div style={{display:"flex", gap:8, justifyContent:"center", marginTop:10}}>
+      <div style={{display:"flex", gap:8, justifyContent:"center", marginTop:10, flexWrap:"wrap"}}>
         <button onClick={() => explain("hi")} disabled={!!loadingLang} className="body-ui" style={{fontSize:9, padding:"6px 12px", borderRadius:999, background: loadingLang==="hi" ? "var(--forest)" : "#FFFFFF", color: loadingLang==="hi" ? "#FFFFFF" : "var(--text-dark)", border:"1px solid rgba(20,35,28,0.12)", cursor:"pointer"}}>हि {uiText(lang, "HINDI")}</button>
         <button onClick={() => explain("te")} disabled={!!loadingLang} className="body-ui" style={{fontSize:9, padding:"6px 12px", borderRadius:999, background: loadingLang==="te" ? "var(--forest)" : "#FFFFFF", color: loadingLang==="te" ? "#FFFFFF" : "var(--text-dark)", border:"1px solid rgba(20,35,28,0.12)", cursor:"pointer"}}>తె {uiText(lang, "TELUGU")}</button>
+        <button onClick={() => explain("bn")} disabled={!!loadingLang} className="body-ui" style={{fontSize:9, padding:"6px 12px", borderRadius:999, background: loadingLang==="bn" ? "var(--forest)" : "#FFFFFF", color: loadingLang==="bn" ? "#FFFFFF" : "var(--text-dark)", border:"1px solid rgba(20,35,28,0.12)", cursor:"pointer"}}>বাং {uiText(lang, "BENGALI")}</button>
+        <button onClick={() => explain("mr")} disabled={!!loadingLang} className="body-ui" style={{fontSize:9, padding:"6px 12px", borderRadius:999, background: loadingLang==="mr" ? "var(--forest)" : "#FFFFFF", color: loadingLang==="mr" ? "#FFFFFF" : "var(--text-dark)", border:"1px solid rgba(20,35,28,0.12)", cursor:"pointer"}}>म {uiText(lang, "MARATHI")}</button>
+        <button onClick={() => explain("ta")} disabled={!!loadingLang} className="body-ui" style={{fontSize:9, padding:"6px 12px", borderRadius:999, background: loadingLang==="ta" ? "var(--forest)" : "#FFFFFF", color: loadingLang==="ta" ? "#FFFFFF" : "var(--text-dark)", border:"1px solid rgba(20,35,28,0.12)", cursor:"pointer"}}>த {uiText(lang, "TAMIL")}</button>
       </div>
       {explained && <p className="body-ui" style={{fontSize:10, marginTop:8, textAlign:"center", color:"rgba(20,35,28,0.62)", textTransform:"none", letterSpacing:".02em"}}>{explained}</p>}
     </div>
