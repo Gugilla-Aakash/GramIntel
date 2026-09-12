@@ -14,7 +14,16 @@ export const LANG_OPTIONS: { code: UiLang; label: string; name: string }[] = [
   { code: "en", label: "EN", name: "English" },
   { code: "hi", label: "हि", name: "हिन्दी" },
   { code: "te", label: "తె", name: "తెలుగు" },
+  { code: "bn", label: "বাং", name: "বাংলা" },
+  { code: "mr", label: "म", name: "मराठी" },
+  { code: "ta", label: "த", name: "தமிழ்" },
 ];
+
+const SUPPORTED: readonly string[] = ["en", "hi", "te", "bn", "mr", "ta"];
+
+function isSupported(v: unknown): v is UiLang {
+  return typeof v === "string" && (SUPPORTED as readonly string[]).includes(v);
+}
 
 export interface HeroStrings {
   eyebrow: string;
@@ -73,6 +82,42 @@ export const HERO: Record<UiLang, HeroStrings> = {
     ctaSecondary: "ఇది ఎలా ఆలోచిస్తుందో చూడండి",
     mapLink: "లైవ్ వ్యాపార మ్యాప్ చూడండి",
   },
+  bn: {
+    eyebrow: "তৃণমূল উদ্যোক্তাদের জন্য AI",
+    line1: "স্থানীয়",
+    line2: "সুযোগকে",
+    line3a: "",
+    line3b: "টেকসই",
+    line4: "ব্যবসায় বদলান",
+    sub: "GramIntel আপনার গ্রামের চারপাশের অর্থনৈতিক সংকেত — ভোক্তা, প্রতিযোগিতা, চাহিদা — পড়ে সেগুলোকে নির্ভরযোগ্য ব্যবসায়িক সিদ্ধান্তে বদলে দেয়।",
+    ctaPrimary: "আমার ব্যবসা বিশ্লেষণ করুন",
+    ctaSecondary: "দেখুন এটি কীভাবে ভাবে",
+    mapLink: "লাইভ ব্যবসার মানচিত্র দেখুন",
+  },
+  mr: {
+    eyebrow: "तळागाळातील उद्योजकतेसाठी AI",
+    line1: "स्थानिक",
+    line2: "संधीचे",
+    line3a: "",
+    line3b: "शाश्वत",
+    line4: "व्यवसायात रूपांतर करा",
+    sub: "GramIntel तुमच्या गावाभोवतीचे आर्थिक संकेत — ग्राहक, स्पर्धा, मागणी — वाचते आणि त्यांचे विश्वासार्ह व्यावसायिक निर्णयात रूपांतर करते.",
+    ctaPrimary: "माझ्या व्यवसायाचे विश्लेषण करा",
+    ctaSecondary: "ते कसे विचार करते ते पहा",
+    mapLink: "लाइव्ह व्यवसाय नकाशा पहा",
+  },
+  ta: {
+    eyebrow: "அடித்தள தொழில்முனைவுக்கான AI",
+    line1: "உள்ளூர்",
+    line2: "வாய்ப்பை",
+    line3a: "",
+    line3b: "நிலையான",
+    line4: "தொழிலாக மாற்றுங்கள்",
+    sub: "GramIntel உங்கள் கிராமத்தைச் சுற்றியுள்ள பொருளாதார சமிக்ஞைகளை — நுகர்வோர், போட்டி, தேவை — படித்து அவற்றை நம்பகமான தொழில் முடிவாக மாற்றுகிறது.",
+    ctaPrimary: "என் தொழிலைப் பகுப்பாய்வு செய்க",
+    ctaSecondary: "அது எப்படி சிந்திக்கிறது என்று பாருங்கள்",
+    mapLink: "நேரடி தொழில் வரைபடத்தைப் பாருங்கள்",
+  },
 };
 
 export const NAV: Record<UiLang, NavStrings> = {
@@ -93,6 +138,24 @@ export const NAV: Record<UiLang, NavStrings> = {
     cta: "నా వ్యాపారాన్ని విశ్లేషించండి",
     menuCta: "నా వ్యాపారాన్ని విశ్లేషించండి",
     langLabel: "భాష",
+  },
+  bn: {
+    links: ["পদ্ধতি", "মানচিত্র", "বাজার", "সম্ভাব্যতা", "অর্থ", "প্রকল্প", "ভাষা"],
+    cta: "আমার ব্যবসা বিশ্লেষণ করুন",
+    menuCta: "আমার ব্যবসা বিশ্লেষণ করুন",
+    langLabel: "ভাষা",
+  },
+  mr: {
+    links: ["पद्धत", "नकाशा", "बाजार", "व्यवहार्यता", "अर्थ", "योजना", "भाषा"],
+    cta: "माझ्या व्यवसायाचे विश्लेषण करा",
+    menuCta: "माझ्या व्यवसायाचे विश्लेषण करा",
+    langLabel: "भाषा",
+  },
+  ta: {
+    links: ["முறை", "வரைபடம்", "சந்தை", "சாத்தியம்", "நிதி", "திட்டங்கள்", "மொழி"],
+    cta: "என் தொழிலைப் பகுப்பாய்வு செய்க",
+    menuCta: "என் தொழிலைப் பகுப்பாய்வு செய்க",
+    langLabel: "மொழி",
   },
 };
 
@@ -118,7 +181,7 @@ export function tL(lang: UiLang, section: LandingSection, key: string): string {
 export function getUiLang(): UiLang {
   try {
     const v = localStorage.getItem(LANG_KEY);
-    if (v === "en" || v === "hi" || v === "te") return v;
+    if (isSupported(v)) return v;
   } catch {}
   return "en";
 }
@@ -138,12 +201,12 @@ export function useUiLang(): UiLang {
     setLang(getUiLang());
     const onStorage = (e: StorageEvent) => {
       if (e.key !== LANG_KEY) return;
-      if (e.newValue === "en" || e.newValue === "hi" || e.newValue === "te") setLang(e.newValue);
+      if (isSupported(e.newValue)) setLang(e.newValue);
       else if (e.newValue === null) setLang("en");
     };
     const onCustom = (e: Event) => {
       const v = (e as CustomEvent<UiLang>).detail;
-      if (v === "en" || v === "hi" || v === "te") setLang(v);
+      if (isSupported(v)) setLang(v);
     };
     window.addEventListener("storage", onStorage);
     window.addEventListener(LANG_EVENT, onCustom as EventListener);
