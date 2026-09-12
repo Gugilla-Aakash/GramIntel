@@ -4,19 +4,24 @@ from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.docs import get_swagger_ui_html, get_redoc_html
 from fastapi.openapi.utils import get_openapi
-from .db import create_db_and_tables
+from .db import create_db_and_tables, ensure_case_columns
 from .seed import seed
 from .routers import auth as auth_router
 from .routers import assistant as assistant_router
 from .routers import cases as cases_router
 from .routers import portal as portal_router
 from .routers import applicant as applicant_router
+from .routers import operator as operator_router
 from .routers import places as places_router
 from .config import settings
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     create_db_and_tables()
+    try:
+        ensure_case_columns()
+    except Exception as e:
+        print(f"[lifespan] case migration skipped: {e}")
     try:
         seed()
     except Exception as e:
@@ -38,6 +43,7 @@ app.include_router(assistant_router.router)
 app.include_router(cases_router.router)
 app.include_router(portal_router.router)
 app.include_router(applicant_router.router)
+app.include_router(operator_router.router)
 app.include_router(places_router.router)
 
 def _is_prod():
