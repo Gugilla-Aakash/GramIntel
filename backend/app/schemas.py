@@ -4,7 +4,7 @@ from datetime import datetime
 
 class OTPRequest(BaseModel):
     email: str
-    role: str = Field(default="applicant", pattern="^(applicant|officer)$")
+    role: str = Field(default="applicant", pattern="^(applicant|officer|middleman)$")
 
 class OTPVerify(BaseModel):
     email: str
@@ -19,6 +19,9 @@ class AnalyzeRequest(BaseModel):
     language: str = Field(default="en", pattern="^(en|hi|te|bn|mr|ta)$")
     lat: Optional[float] = None
     lng: Optional[float] = None
+    farmer_email: Optional[str] = None
+    farmer_name: Optional[str] = None
+    farmer_phone: Optional[str] = None
 
 class NarrateRequest(BaseModel):
     language: str = Field(default="en", pattern="^(en|hi|te|bn|mr|ta)$")
