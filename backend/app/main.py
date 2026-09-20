@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.docs import get_swagger_ui_html, get_redoc_html
 from fastapi.openapi.utils import get_openapi
 from .db import create_db_and_tables, ensure_case_columns
+from .observability import init_tracer
 from .seed import seed
 from .routers import auth as auth_router
 from .routers import assistant as assistant_router
@@ -26,6 +27,7 @@ async def lifespan(app: FastAPI):
         seed()
     except Exception as e:
         print(f"[lifespan] seed failed: {e}")
+    init_tracer(settings.CODEXRAY_SERVICE, settings.CODEXRAY_URL, settings.CODEXRAY_API_KEY)
     yield
 
 app = FastAPI(title="GramIntel API", version="0.1.0", description="GramIntel — Hyper-local Business Advisory & Financial Structuring", lifespan=lifespan, docs_url=None, redoc_url=None, openapi_url=None)
