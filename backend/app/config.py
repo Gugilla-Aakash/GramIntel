@@ -29,6 +29,9 @@ class Settings(BaseSettings):
     OVERPASS_FALLBACK: str = "https://overpass.kumi.systems/api/interpreter"
     API_BASE: str = "http://localhost:8000"
     CORS_ORIGINS: str = ""
+    CODEXRAY_URL: Optional[str] = None
+    CODEXRAY_API_KEY: Optional[str] = None
+    CODEXRAY_SERVICE: str = "gramintel-api"
 
     class Config:
         env_file = ("backend/.env", ".env", "backend/app/.env")
