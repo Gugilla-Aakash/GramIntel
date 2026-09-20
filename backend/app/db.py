@@ -25,5 +25,7 @@ def ensure_case_columns(target_engine=None):
                 print(f"[db] migrated cases: added column {col}")
 
 def get_session():
+    from .observability import span as cx_span
     with Session(engine) as session:
-        yield session
+        with cx_span("sqlite session", service="sqlite"):
+            yield session
