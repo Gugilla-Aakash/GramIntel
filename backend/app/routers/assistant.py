@@ -9,6 +9,7 @@ from ..schemas import AnalyzeRequest, NarrateRequest
 from ..services.financial import compute_financial_plan
 from ..services.feasibility import compute_feasibility
 from ..services.narrative import generate_narrative
+from ..observability import span as cx_span
 
 router = APIRouter(prefix="/assistant", tags=["assistant"])
 
@@ -27,7 +28,8 @@ def analyze(payload: AnalyzeRequest, user: User = Depends(get_current_user), ses
         lat = payload.lat if payload.lat is not None else 17.3835
         lng = payload.lng if payload.lng is not None else 78.3222
         client = OverpassClient(primary=settings.OVERPASS_PRIMARY, fallback=settings.OVERPASS_FALLBACK, timeout=25.0)
-        osm_result = client.count_shops_sync(lat, lng, 8000)
+        with cx_span("overpass shops", service="overpass", metadata={"lat": lat, "lng": lng}):
+            osm_result = client.count_shops_sync(lat, lng, 8000)
     except Exception:
         osm_result = {"count": 17, "source": "seeded"}
 
