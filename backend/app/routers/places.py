@@ -5,6 +5,7 @@ import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../../../clients"))
 from gramintel.overpass_client import OverpassClient
 from ..config import settings
+from ..observability import span as cx_span
 
 router = APIRouter(prefix="/places", tags=["places"])
 
@@ -21,7 +22,9 @@ def places_nearby(
             fallback=settings.OVERPASS_FALLBACK,
             timeout=55.0,
         )
-        res = client.fetch_sync(lat, lng, radius_m, query_timeout=45, include_ways=False)
+        res = None
+        with cx_span("overpass fetch", service="overpass", metadata={"lat": lat, "lng": lng, "radius_m": radius_m}):
+            res = client.fetch_sync(lat, lng, radius_m, query_timeout=45, include_ways=False)
         return {"elements": res["data"].get("elements", []), "source": "live"}
     except Exception:
         raise HTTPException(status_code=503, detail="Overpass unavailable")
